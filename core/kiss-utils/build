@@ -1,7 +1,0 @@
-#!/bin/sh -e
-
-cd bin
-
-for bin in *; do
-    install -D "$bin" "$1/usr/bin/$bin"
-done
