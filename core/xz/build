@@ -6,5 +6,7 @@
 make
 make DESTDIR="$1" install
 
+install -D xz_vars.sh "$1/etc/profile.d/xz_vars.sh"
+
 # Remove docs.
 rm -rf "$1/usr/share/doc"
