@@ -1,3 +1,5 @@
+KISS Linux fork with systemd/glibc
+
 # KISS Package System
 
 The package system was built specifically for KISS and employs a UNIX-like file model. Instead of the typical shell script with variables, arrays and functions; this system uses easily parseable plain text files.
