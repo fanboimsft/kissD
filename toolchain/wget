@@ -1,0 +1,42 @@
+pkgbuild_version=5
+pkgname=wget
+pkgver=1.20.1
+
+dependencies=(
+    "!$pkgname"
+    'util-linux'
+    'openssl'
+)
+sources=(
+    "http://ftp.gnu.org/gnu/wget/${pkgname}-${pkgver}.tar.lz"
+)
+sha1sums=(
+)
+
+lfs_me_prepare() {
+	tar -xvf "${sources_dir}/${pkgname}-${pkgver}.tar.lz" -C "$build_dir"
+
+	cd "${build_dir}/${pkgname}-${pkgver}"
+
+	./configure --prefix=/tools --with-ssl=openssl --without-libpsl --disable-pcre --disable-pcre2
+}
+
+lfs_me_install() {
+	cd "${build_dir}/${pkgname}-${pkgver}"
+	make DESTDIR="$fakeroot_dir" install
+
+    	#don't overwrite info pages
+    	rm "${fakeroot_dir}/tools/share/info/dir"
+}
+
+lfs_me_postinstall() {
+    echo "Adding info pages"
+    install-info /tools/share/info/wget.info /tools/share/info/dir
+}
+
+lfs_me_preremove() {
+    echo "Removing info pages"
+    install-info --delete /tools/share/info/wget.info /tools/share/info/dir
+}
+
+# vim:set syntax=sh et:

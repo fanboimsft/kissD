@@ -1,0 +1,38 @@
+pkgbuild_version=5
+pkgname=groff
+pkgver=1.22.3
+
+_info_pages=(
+    'groff.info-3'
+    'groff.info-2'
+    'groff.info-1'
+    'groff.info'
+)
+
+dependencies=(
+    "!$pkgname"
+    'perl'
+)
+sources=(
+    "http://ftp.gnu.org/gnu/${pkgname}/${pkgname}-${pkgver}.tar.gz"
+)
+sha1sums=(
+)
+
+lfs_me_prepare() {
+	tar -xf "${sources_dir}/${pkgname}-${pkgver}.tar.gz" -C "$build_dir"
+
+	cd "${build_dir}/${pkgname}-${pkgver}"
+
+	PAGE=A4 ./configure --prefix=/tools
+}
+
+lfs_me_check() {
+    return
+}
+
+lfs_me_install() {
+	cd "${build_dir}/${pkgname}-${pkgver}"
+	make DESTDIR="$fakeroot_dir" install
+}
+# vim:set syntax=sh et:

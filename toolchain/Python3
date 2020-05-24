@@ -1,0 +1,41 @@
+pkgbuild_version=5
+pkgname=Python3
+_pkgname=Python
+pkgver=3.8.3
+
+overwrite=(
+	'/usr/bin/python'
+	'/usr/bin/2to3'
+)
+dependencies=(
+	"!${pkgname}"
+)
+sources=(
+	"http://www.python.org/ftp/python/${pkgver}/${_pkgname}-${pkgver}.tar.xz"
+)
+sha1sums=(
+)
+
+lfs_me_prepare() {
+	tar -xf "${sources_dir}/${_pkgname}-${pkgver}.tar.xz" -C "$build_dir"
+
+	cd "${build_dir}/${_pkgname}-${pkgver}"
+	sed -i '/def add_multiarch_paths/a \        return' setup.py
+	./configure --prefix=/tools       \
+	--without-ensurepip
+}
+
+lfs_me_check() {
+	return
+}
+
+lfs_me_build(){
+	 cd "${build_dir}/${_pkgname}-${pkgver}"
+	make
+}
+
+lfs_me_install() {
+	cd "${build_dir}/${_pkgname}-${pkgver}"
+	make DESTDIR="$fakeroot_dir" install
+}
+# vim:set ts=4 syntax=sh:

@@ -1,0 +1,39 @@
+pkgbuild_version=5
+pkgname=flex
+pkgver=2.6.4
+
+_info_pages=(
+	'flex.info'
+	'flex.info-1'
+	'flex.info-2'
+)
+
+dependencies=(
+    "!$pkgname"
+	'glibc'
+	'm4'
+)
+sources=(
+	"https://github.com/westes/flex/releases/download/v${pkgver}/flex-${pkgver}.tar.gz"
+)
+
+
+Asha1sums=(
+)
+
+lfs_me_prepare() {
+	tar -xf "${sources_dir}/${pkgname}-${pkgver}.tar.gz" -C "$build_dir"
+	cd "${build_dir}/${pkgname}-${pkgver}"
+	./configure --prefix=/tools
+}
+
+lfs_me_build() {
+	cd "${build_dir}/${pkgname}-${pkgver}"
+	make
+}
+
+lfs_me_install() {
+	cd "${build_dir}/${pkgname}-${pkgver}"
+	make DESTDIR="$fakeroot_dir" install
+}
+# vim:set syntax=sh et:

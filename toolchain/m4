@@ -1,0 +1,37 @@
+pkgbuild_version=5
+pkgname=m4
+pkgver=1.4.18
+
+_info_pages=(
+    'm4.info-2'
+    'm4.info-1'
+    'm4.info'
+)
+
+dependencies=(
+    "!$pkgname"
+    'glibc'
+)
+sources=(
+    "http://ftp.gnu.org/gnu/${pkgname}/${pkgname}-${pkgver}.tar.xz"
+)
+sha1sums=(
+)
+
+lfs_me_prepare() {
+	tar -xf "${sources_dir}/${pkgname}-${pkgver}.tar.xz" -C "$build_dir"
+
+	cd "${build_dir}/${pkgname}-${pkgver}"
+	sed -i 's/IO_ftrylockfile/IO_EOF_SEEN/' lib/*.c
+	echo "#define _IO_IN_BACKUP 0x100" >> lib/stdio-impl.h
+	sed -i 's/IO_ftrylockfile/IO_EOF_SEEN/' lib/*.c
+	echo "#define _IO_IN_BACKUP 0x100" >> lib/stdio-impl.h
+	./configure --prefix=/tools
+}
+
+lfs_me_install() {
+	cd "${build_dir}/${pkgname}-${pkgver}"
+	make DESTDIR="$fakeroot_dir" install
+	rm ${fakeroot_dir}/tools/share/info/dir
+}
+# vim:set syntax=sh et:

@@ -1,0 +1,10 @@
+    meson \
+        --prefix=/usr \
+        --sysconfdir=/etc \
+        --mandir=/usr/share/man \
+        -Ddocs=false \
+        -Dintrospection=false \
+        . output
+
+    ninja -C output
+    ninja -C output install

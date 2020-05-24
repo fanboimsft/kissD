@@ -1,0 +1,12 @@
+files/profile
+files/bash_completion.sh
+files/dircolors.sh
+files/extrapaths.sh
+files/readline.sh
+files/umask.sh
+files/i18n.sh
+files/bashrc
+files/.bash_profile
+files/.profile
+files/.bashrc
+files/.bash_logout

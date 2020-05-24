@@ -1,0 +1,8 @@
+#!/bin/sh -e
+:> nostrip
+
+./configure --prefix=/usr \
+    --disable-static
+
+make BISON_LOCALEDIR=/usr/share/locale
+make DESTDIR="$1" install

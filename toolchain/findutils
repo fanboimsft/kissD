@@ -1,0 +1,37 @@
+pkgbuild_version=5
+pkgname=findutils
+pkgver=4.7.0
+
+_info_pages=(
+    'find-maint.info'
+    'find.info'
+)
+
+dependencies=(
+    "!$pkgname"
+    'glibc'
+    'bash'
+)
+sources=(
+    "http://ftp.gnu.org/gnu/${pkgname}/${pkgname}-${pkgver}.tar.xz"
+)
+sha1sums=(
+)
+
+lfs_me_prepare() {
+	tar -xf "${sources_dir}/${pkgname}-${pkgver}.tar.xz" -C "$build_dir"
+	cd "${build_dir}/${pkgname}-${pkgver}"
+	#glibc 2.28 fix
+	echo "#define _IO_IN_BACKUP 0x100" >> gl/lib/stdio-impl.h
+	./configure --prefix=/tools
+	sed -i 's/IO_ftrylockfile/IO_EOF_SEEN/' gl/lib/*.c
+	sed -i '/unistd/a #include <sys/sysmacros.h>' gl/lib/mountlist.c
+	echo "#define _IO_IN_BACKUP 0x100" >> gl/lib/stdio-impl.h
+            ./configure --prefix=/tools
+}
+
+lfs_me_install() {
+	cd "${build_dir}/${pkgname}-${pkgver}"
+	make DESTDIR="$fakeroot_dir" install
+}
+# vim:set syntax=sh et:

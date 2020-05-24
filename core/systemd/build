@@ -1,0 +1,39 @@
+#!/bin/sh -e
+
+sed -i 's/GROUP="render", //' rules.d/50-udev-default.rules.in
+
+mkdir -p build
+cd       build
+
+LANG=en_US.UTF-8 \
+meson --prefix=/usr                \
+      --sysconfdir=/etc            \
+      --localstatedir=/var         \
+     -Dc_args=-Wno-format-overflow \
+      -Dblkid=true                 \
+      -Dbuildtype=release          \
+      -Ddefault-dnssec=no          \
+      -Dfirstboot=false            \
+      -Dinstall-tests=false        \
+      -Dldconfig=false             \
+      -Dman=auto		   \
+      -Drootprefix=                \
+      -Drootlibdir=/lib            \
+      -Dsplit-usr=true             \
+      -Dsysusers=false             \
+      -Db_lto=false                \
+      -Dhomed=false                \
+      -Duserdb=false               \
+      -Ddns-servers="1.1.1.1 8.8.8.8" \
+      -Dgnu-efi=true \
+      ..
+
+LANG=en_US.UTF-8 ninja
+LANG=en_US.UTF-8 DESTDIR="$1" ninja install
+
+install -v -m755 -d "$1/etc/pam.d"
+install -v -m644 ../system-session "$1/etc/pam.d/system-session"
+install -v -m644 ../systemd-user "$1/etc/pam.d/systemd-user"
+
+install -v -m755 -d "$1/etc/systemd/network"
+install -v -m644 ../20-wired.network "$1/etc/systemd/network/20-wired.network"

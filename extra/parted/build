@@ -1,0 +1,20 @@
+#!/bin/sh -e
+
+# Glibc fix.
+sed -i '/utsname.h/a#include <sys/sysmacros.h>' libparted/arch/linux.c
+
+./configure \
+    --prefix=/usr \
+    --disable-static
+
+make
+make DESTDIR="$1" install
+
+# Remove tmp file.
+rm -rf "$1/tmp/cupsinit"
+
+# Remove all info files.
+rm -rf "$1/usr/share/info"
+
+# Remove docs.
+rm -rf "$1/usr/share/doc"

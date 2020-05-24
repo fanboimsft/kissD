@@ -1,0 +1,30 @@
+#!/bin/sh
+
+# Add polkit group and user.
+sudo /usr/bin/groupadd -fg 27 polkitd
+
+sudo /usr/bin/useradd -c "PolicyKit Daemon Owner" -d /etc/polkit-1 -u 27 \
+    -g polkitd -s /bin/false polkitd
+
+# Remove check for chroot build.
+sed -i "s:/sys/fs/cgroup/systemd/:/sys:g" configure
+
+./configure \
+    --prefix=/usr \
+    --sysconfdir=/etc \
+    --localstatedir=/var \
+    --disable-static \
+    --enable-libsystemd-login=yes \
+    --with-os-type=redhat
+    
+make
+make DESTDIR="$1" install
+
+install -v -m755 -d "$1/etc/pam.d"
+install -v -m644 polkit-1 "$1/etc/pam.d/polkit-1"
+
+# Remove all info files.
+rm -rf "$1/usr/share/info"
+
+# Remove docs.
+rm -rf "$1/usr/share/doc"

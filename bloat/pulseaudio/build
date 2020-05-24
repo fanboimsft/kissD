@@ -1,0 +1,20 @@
+#!/bin/sh -e
+
+./configure --prefix=/usr        \
+            --sysconfdir=/etc    \
+            --localstatedir=/var \
+            --disable-bluez4     \
+            --disable-bluez5     \
+            --disable-rpath
+
+make
+make DESTDIR="$1" install
+
+# Remove systemwide conf
+rm -rf "$1/etc/dbus-1/system.d/pulseaudio-system.conf"
+
+# Remove all info files.
+rm -rf "$1/usr/share/info"
+
+# Remove docs.
+rm -rf "$1/usr/share/doc"

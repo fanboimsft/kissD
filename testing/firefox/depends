@@ -1,0 +1,81 @@
+alsa-lib
+<<<<<<< HEAD
+bzip2
+cbindgen      make
+clang         make
+ffmpeg
+freetype-harfbuzz make
+gtk+2         make
+gtk+3
+hicolor-icon-theme
+libSM
+libXcomposite
+libXcursor
+libXrender
+libXt
+libjpeg-turbo
+libffi
+libpng
+libvpx
+llvm          make
+nasm          make
+nodejs        make
+=======
+atk
+bzip2
+cairo
+cbindgen      make
+clang         make
+expat
+ffmpeg
+fontconfig
+freetype-harfbuzz
+fribidi
+gdk-pixbuf
+glib
+gtk+2         make
+gtk+3
+hicolor-icon-theme
+libICE
+libSM
+libX11
+libXau
+libXcomposite
+libXcursor
+libXdamage
+libXext
+libXfixes
+libXi
+libXinerama
+libXrandr
+libXrender
+libXt
+libXxf86vm
+libdrm
+libepoxy
+libffi
+libjpeg-turbo
+libpng
+libvpx
+libxcb
+libxshmfence
+llvm          make
+mesa
+nasm          make
+nodejs        make
+pango
+>>>>>>> ea0befc... testing: Added firefox 70b
+perl          make
+pixman
+python        make
+python2       make
+rust          make
+<<<<<<< HEAD
+yasm          make
+zip           make
+=======
+util-linux
+yasm          make
+zip           make
+zlib
+>>>>>>> ea0befc... testing: Added firefox 70b

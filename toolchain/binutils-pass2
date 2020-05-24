@@ -1,0 +1,80 @@
+pkgbuild_version=5
+_pkgbase=binutils
+pkgname="${_pkgbase}-pass2"
+pkgver=2.34
+
+_info_pages=(
+    'binutils.info'
+    'ld.info'
+    'bfd.info'
+    'gprof.info'
+    'as.info'
+    'configure.info'
+    'standards.info'
+)
+
+dependencies=(
+    "!$pkgname"
+    'glibc'
+    'libstdc++'
+    'gcc-pass1'
+)
+sources=(
+	"http://ftp.gnu.org/gnu/binutils/${_pkgbase}-${pkgver}.tar.xz"
+)
+overwrite=(
+	"/tools/share/info/ld.info"
+	"/tools/share/info/gprof.info"	
+	"/tools/share/info/as.info"	
+	"/tools/share/info/binutils.info"
+	"/tools/share/info/bfd.info"	
+)
+
+sha1sums=(
+
+)
+
+lfs_me_prepare() {
+
+	rm -rf ${build_dir}/${_pkgbase}-build
+	tar -xf "${sources_dir}/${_pkgbase}-${pkgver}.tar.xz" -C "$build_dir"
+
+	cd "${build_dir}/${_pkgbase}-${pkgver}"
+
+    [ ! -z $LFS ] && [ ! -z $LFS_TGT ] || lfs_me_error "LFS and LFS_TGT environment variables aren't set!" false
+
+    mkdir "../${_pkgbase}-build"
+    cd "../${_pkgbase}-build"
+
+    CC=$LFS_TGT-gcc                \
+    AR=$LFS_TGT-ar                 \
+    RANLIB=$LFS_TGT-ranlib         \
+    "../${_pkgbase}-${pkgver}/configure"   \
+        --prefix=/tools            \
+        --disable-nls              \
+        --disable-werror           \
+        --with-lib-path=/tools/lib \
+        --with-sysroot
+}
+
+lfs_me_build() {
+	cd "${build_dir}/${_pkgbase}-build"
+            make
+}
+
+lfs_me_check() {
+            return
+}
+
+lfs_me_install() {
+	cd "${build_dir}/${_pkgbase}-build"
+	make DESTDIR="$fakeroot_dir" install
+    	
+            make -C ld clean
+            make -C ld LIB_PATH=/usr/lib:/lib
+            mkdir -pv "${fakeroot_dir}/tools/bin"
+            cp -v ld/ld-new "${fakeroot_dir}/tools/bin"
+    	#rm ${fakeroot_dir}/tools/share/info/dir
+}
+
+# vim:set syntax=sh et:

@@ -1,0 +1,26 @@
+pkgbuild_version=5
+pkgname=gzip
+pkgver=1.10
+
+dependencies=(
+    "!$pkgname"
+    'glibc'
+    'bash'
+)
+sources=(
+    "http://ftp.gnu.org/gnu/${pkgname}/${pkgname}-${pkgver}.tar.xz"
+)
+sha1sums=(
+)
+
+lfs_me_prepare() {
+	tar -xf "${sources_dir}/${pkgname}-${pkgver}.tar.xz" -C "$build_dir"
+	cd "${build_dir}/${pkgname}-${pkgver}"
+	./configure --prefix=/tools
+}
+
+lfs_me_install() {
+	cd "${build_dir}/${pkgname}-${pkgver}"
+	make DESTDIR="$fakeroot_dir" install
+}
+# vim:set syntax=sh et:

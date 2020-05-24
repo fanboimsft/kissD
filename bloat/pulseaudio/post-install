@@ -1,0 +1,5 @@
+#!/bin/sh -e
+
+# Remove Console-Kit reference.
+
+sed -i '/load-module module-console-kit/s/^/#/' /etc/pulse/default.pa

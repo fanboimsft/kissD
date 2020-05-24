@@ -1,0 +1,22 @@
+#!/bin/sh -e
+
+./configure \
+    --prefix=/usr \
+    --sbindir=/usr/bin \
+    --libexecdir=/usr/lib \
+    --disable-root-mailer \
+    --disable-nls \
+    --enable-pie \
+    --without-sendmail \
+    --with-ignore-dot \
+    --with-logfac=auth \
+    --with-passprompt="[sudo] password for %p: "
+
+make
+make \
+    DESTDIR="$1" \
+    install_uid="$(id -u)" \
+    install_gid="$(id -g)" \
+    install
+
+install -Dm0644 sudo "$1/etc/pam.d/sudo"

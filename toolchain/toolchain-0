@@ -1,0 +1,63 @@
+pkgbuild_version=5
+pkgname=toolchain
+pkgver=0
+
+dependencies=(
+    "!$pkgname"
+	'binutils-pass1'
+	'gcc-pass1'
+	'linux-headers'
+	'glibc'
+	'libstdc++'
+	'binutils-pass2'
+	'gcc-pass2'
+	'zlib'
+	'tcl'
+	'expect'
+	'dejagnu'
+	'Check'
+	'ncurses'
+	'bash'
+	'bzip2'
+	'coreutils'
+	'diffutils'
+	'file'
+	'findutils'
+	'gawk'
+	'gettext'
+	'grep'
+	'gzip'
+	'm4'
+	'make'
+	'patch'
+	'perl'
+	'sed'
+#	'tar'
+	'texinfo'
+	'util-linux'
+	'xz'
+	'fakeroot'
+	'nano'
+	'rsync'
+	'openssl'
+	'bc'
+	'wget'
+)
+
+lfs_me_prepare() {
+    return
+}
+
+lfs_me_build() {
+    return
+}
+
+lfs_me_check() {
+    return
+}
+
+lfs_me_install() {
+    return
+}
+
+# vim:set syntax=sh et:

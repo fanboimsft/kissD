@@ -1,0 +1,22 @@
+#!/bin/sh -e
+
+install --directory --mode=0755 --owner=root --group=root "$1/etc/profile.d"
+install --directory --mode=0755 --owner=root --group=root "$1/etc/bash_completion.d"
+install --directory --mode=0755 --owner=root --group=root "$1/etc/skel/"
+
+install -v -m644 profile "$1/etc/profile"
+install -v -m644 bash_completion.sh "$1/etc/profile.d/bash_completion.sh"
+install -v -m644 dircolors.sh "$1/etc/profile.d/dircolors.sh"
+install -v -m644 extrapaths.sh "$1/etc/profile.d/extrapaths.sh"
+install -v -m644 readline.sh "$1/etc/profile.d/readline.sh"
+install -v -m644 umask.sh "$1/etc/profile.d/umask.sh"
+install -v -m644 i18n.sh "$1/etc/profile.d/i18n.sh"
+
+install -v -m644 bashrc "$1/etc/bashrc"
+
+install -v -m644 .bash_profile "$1/etc/skel/.bash_profile"
+install -v -m644 .profile "$1/etc/skel/.profile"
+install -v -m644 .bashrc "$1/etc/skel/.bashrc"
+install -v -m644 .bash_logout "$1/etc/skel/.bash_logout"
+
+dircolors -p > "$1/etc/dircolors"

@@ -1,0 +1,19 @@
+#!/bin/sh -e
+
+# Don't produce optimized code
+cp -v configfsf.guess config.guess
+cp -v configfsf.sub   config.sub
+
+./configure \
+    --prefix=/usr \
+    --enable-cxx \
+    --disable-static
+
+make
+make DESTDIR="$1" install
+
+# Remove all info files.
+rm -rf "$1/usr/share/info"
+
+# Remove docs.
+rm -rf "$1/usr/share/doc"

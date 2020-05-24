@@ -1,0 +1,24 @@
+#!/bin/sh -e
+
+# Remove symlinks.
+rm -vf /usr/include/{blkid,libmount,uuid}
+
+./configure \
+    --disable-chfn-chsh  \
+    --disable-login      \
+    --disable-nologin    \
+    --disable-su         \
+    --disable-setpriv    \
+    --disable-runuser    \
+    --disable-pylibmount \
+    --disable-static     \
+    --without-python
+
+make
+make DESTDIR="$1" install
+
+# Remove all info files.
+rm -rf "$1/usr/share/info"
+
+# Remove docs.
+rm -rf "$1/usr/share/doc"

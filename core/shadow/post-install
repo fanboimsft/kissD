@@ -1,0 +1,38 @@
+#!/bin/sh -e
+
+sed -i 's/yes/no/' /etc/default/useradd
+
+install -v -m644 /etc/login.defs /etc/login.defs.orig &&
+for FUNCTION in FAIL_DELAY               \
+                FAILLOG_ENAB             \
+                LASTLOG_ENAB             \
+                MAIL_CHECK_ENAB          \
+                OBSCURE_CHECKS_ENAB      \
+                PORTTIME_CHECKS_ENAB     \
+                QUOTAS_ENAB              \
+                CONSOLE MOTD_FILE        \
+                FTMP_FILE NOLOGINS_FILE  \
+                ENV_HZ PASS_MIN_LEN      \
+                SU_WHEEL_ONLY            \
+                CRACKLIB_DICTPATH        \
+                PASS_CHANGE_TRIES        \
+                PASS_ALWAYS_WARN         \
+                CHFN_AUTH ENCRYPT_METHOD \
+                ENVIRON_FILE
+do
+    sed -i "s/^${FUNCTION}/# &/" /etc/login.defs
+done
+
+for PROGRAM in chfn chgpasswd chpasswd chsh groupadd groupdel \
+               groupmems groupmod newusers useradd userdel usermod
+do
+    install -v -m644 /etc/pam.d/chage /etc/pam.d/${PROGRAM}
+    sed -i "s/chage/$PROGRAM/" /etc/pam.d/${PROGRAM}
+done
+
+[ -f /etc/login.access ] && mv -v /etc/login.access{,.NOUSE}
+
+[ -f /etc/limits ] && mv -v /etc/limits{,.NOUSE}
+
+grpconv
+pwconv

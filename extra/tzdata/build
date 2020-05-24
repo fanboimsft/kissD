@@ -1,0 +1,15 @@
+#!/bin/sh -e
+
+make
+
+mkdir -pv "$1/usr/share/zoneinfo/{posix,right}"
+
+for tz in etcetera southamerica northamerica europe africa antarctica  \
+          asia australasia backward pacificnew systemv; do
+    zic -L /dev/null   -d "$1/usr/share/zoneinfo"       ${tz}
+    zic -L /dev/null   -d "$1/usr/share/zoneinfo/posix" ${tz}
+    zic -L leapseconds -d "$1/usr/share/zoneinfo/right" ${tz}
+done
+
+cp -v zone.tab zone1970.tab iso3166.tab "$1/usr/share/zoneinfo"
+zic -d "$1/usr/share/zoneinfo" -p America/New_York

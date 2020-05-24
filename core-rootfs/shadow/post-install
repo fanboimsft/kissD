@@ -1,0 +1,7 @@
+#!/bin/sh -e
+
+# Don't create mailbox
+sed -i 's/yes/no/' /etc/default/useradd
+
+pwconv
+grpconv

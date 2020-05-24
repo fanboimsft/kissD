@@ -1,0 +1,159 @@
+#vim: filetype=sh
+pkgbuild_version=5
+_pkgbase=gcc
+pkgname="${_pkgbase}-pass2"
+pkgver=10.1.0
+
+_mpfr_ver=4.0.2
+_gmp_ver=6.2.0
+_mpc_ver=1.1.0
+
+#man pages to be deleted
+_man_pages=(
+    '7/gpl.7'
+    '7/gfdl.7'
+    '7/fsf-funding.7'
+)
+
+_info_pages=(
+    'gccint.info'
+    'gcc.info'
+    'cppinternals.info'
+    'cpp.info'
+    'gccinstall.info'
+)
+
+overwrite=(
+    '/tools/lib64/libstdc++.la'
+    '/tools/lib64/libstdc++.a'
+    '/tools/lib64/libsupc++.la'
+    '/tools/lib64/libsupc++.a'
+    "/tools/share/${_pkgbase}-${pkgver}/python/libstdcxx/v6/__init__.py"
+    "/tools/share/${_pkgbase}-${pkgver}/python/libstdcxx/v6/printers.py}"
+    "/tools/share/${_pkgbase}-${pkgver}/python/libstdcxx/__init__.py"
+    "/tools/share/${_pkgbase}-${pkgver}/python/libstdcxx/v6/printers.py"
+    "/tools/lib64/libcc1.la"
+    "/tools/lib64/libstdc++fs.la"
+    "/tools/lib64/libstdc++fs.a"
+    "/tools/lib64/libstdc++.so.6.0.28"
+    "/tools/lib64/libcc1.so.0.0.0"
+    "/tools/share/${_pkgbase}-${pkgver}/python/libstdcxx/v6/xmethods.py"
+    "/tools/lib64/libstdc++.so.6.0.28-gdb.py"	
+    "/tools/share/man/man7/gpl.7"
+    "/tools/share/man/man7/gfdl.7"
+    "/tools/share/man/man7/fsf-funding.7"
+    "/tools/share/info/gccint.info"
+    "/tools/share/info/gccinstall.info"
+    "/tools/share/info/cpp.info"
+    "/tools/share/info/cppinternals.info"
+    "/tools/share/info/gcc.info"
+
+)
+dependencies=(
+    "!$pkgname"
+    'gcc-pass1'
+    'binutils-pass2'
+    'glibc'
+)
+sources=(
+    "http://ftp.gnu.org/gnu/${_pkgbase}/${_pkgbase}-${pkgver}/${_pkgbase}-${pkgver}.tar.xz"
+    "http://www.mpfr.org/mpfr-${_mpfr_ver}/mpfr-${_mpfr_ver}.tar.xz"
+    "http://ftp.gnu.org/gnu/gmp/gmp-${_gmp_ver}.tar.xz"
+    "https://ftp.gnu.org/gnu/mpc/mpc-${_mpc_ver}.tar.gz"
+)
+sha1sums=(
+)
+
+lfs_me_prepare() {
+	tar -xf "${sources_dir}/${_pkgbase}-${pkgver}.tar.xz" -C "$build_dir"
+	
+	cd "${build_dir}/${_pkgbase}-${pkgver}"
+
+            tar -xf "${sources_dir}/mpfr-${_mpfr_ver}.tar.xz"
+            mv -v "mpfr-${_mpfr_ver}" mpfr
+            tar -xf "${sources_dir}/gmp-${_gmp_ver}.tar.xz"
+            mv -v "gmp-${_gmp_ver/[a-z]/}" gmp
+            tar -xf "${sources_dir}/mpc-${_mpc_ver}.tar.gz"
+            mv -v "mpc-${_mpc_ver}" mpc
+            #create full version of internal header
+            cat gcc/limitx.h gcc/glimits.h gcc/limity.h > \
+          `dirname $($LFS_TGT-gcc -print-libgcc-file-name)`/include-fixed/limits.h
+
+            #prepend /tools before path of dynamic loader
+            for file in gcc/config/{linux,i386/linux{,64}}.h
+            do
+            cp -uv $file{,.orig}
+            sed -e 's@/lib\(64\)\?\(32\)\?/ld@/tools&@g' \
+            -e 's@/usr@/tools@g' $file.orig > $file
+            echo '
+#undef STANDARD_STARTFILE_PREFIX_1
+#undef STANDARD_STARTFILE_PREFIX_2
+#define STANDARD_STARTFILE_PREFIX_1 "/tools/lib/"
+#define STANDARD_STARTFILE_PREFIX_2 ""' >> $file
+        touch $file.orig
+    done
+
+    rm -rf "../${_pkgbase}-build"
+    mkdir -v "../${_pkgbase}-build"
+    cd "../${_pkgbase}-build"
+
+    [ ! -z $LFS_TGT ] || lfs_me_error "The LFS_TGT environment variable isn't set!" false
+
+case $(uname -m) in
+x86_64)
+	sed -e '/m64=/s/lib64/lib' \
+	-i.orig gcc/config/i386/t-linux64
+;;
+esac
+
+
+    CC=$LFS_TGT-gcc                                      \
+    CXX=$LFS_TGT-g++                                     \
+    AR=$LFS_TGT-ar                                       \
+    RANLIB=$LFS_TGT-ranlib                               \
+    "../${_pkgbase}-${pkgver}/configure"                 \
+        --prefix=/tools                                  \
+        --with-local-prefix=/tools                       \
+        --with-native-system-header-dir=/tools/include   \
+        --enable-languages=c,c++                         \
+        --disable-libstdcxx-pch                          \
+        --disable-multilib                               \
+        --disable-bootstrap                              \
+        --disable-libgomp
+}
+
+lfs_me_build() {
+    cd "${build_dir}/${_pkgbase}-build"
+    make
+}
+
+lfs_me_check() {
+    return
+}
+
+lfs_me_install() {
+    cd "${build_dir}/${_pkgbase}-build"
+    make DESTDIR="$fakeroot_dir" install
+
+    mkdir -pv "${fakeroot_dir}/tools/bin/"
+    ln -sv gcc "${fakeroot_dir}/tools/bin/cc"
+#    rm ${fakeroot_dir}/tools/share/info/dir
+}
+
+lfs_me_preinstall() {
+    [ ! -z $LFS_TGT ] || lfs_me_error "The LFS_TGT environment variabl isn't set!" false
+}
+
+lfs_me_postinstall() {
+    cd "$build_dir"
+    echo 'main(){}' > dummy.c
+    cc dummy.c
+    case $(uname -m) in
+        x86_64)
+            readelf -l a.out | grep -E ': /tools/lib(|64)/ld-linux-x86-64.so.2' || lfs_me_error "Wrong dynamic loader" false
+            ;;
+        *)
+            readelf -l a.out | grep -E ': /tools/lib/ld-linux.so.2' || lfs_me_error "Wrong dynamic loader" false
+            ;;
+    esac
+}

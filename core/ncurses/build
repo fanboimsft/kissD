@@ -1,0 +1,15 @@
+#!/bin/sh -e
+
+./configure \
+    --prefix=/usr \
+    --mandir=/usr/share/man \
+    --enable-pc-files \
+    --without-normal \
+    --with-pkg-config-libdir=/usr/lib/pkgconfig \
+    --with-shared \
+    --enable-widec \
+    --without-tests \
+    --without-debug
+
+make
+make DESTDIR="$1" install

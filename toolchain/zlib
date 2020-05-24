@@ -1,0 +1,32 @@
+pkgbuild_version=5
+pkgname=zlib
+pkgver=1.2.11
+
+dependencies=(
+    "!$pkgname"
+    'glibc'
+    'gcc-pass2'
+)
+sources=(
+    "http://www.zlib.net/${pkgname}-${pkgver}.tar.xz"
+)
+sha1sums=(
+    b598beb7acc96347cbd1020b71aef7871d374677
+)
+
+lfs_me_prepare() {
+	tar -xf "${sources_dir}/${pkgname}-${pkgver}.tar.xz" -C "$build_dir"
+
+	cd "${build_dir}/${pkgname}-${pkgver}"
+
+	./configure --prefix=/tools
+}
+lfs_me_install() {
+    	cd "${build_dir}/${pkgname}-${pkgver}"
+    	make DESTDIR="${fakeroot_dir}" install
+
+    #mkdir -pv "${fakeroot_dir}/lib"
+    #mv -v "$fakeroot_dir"/usr/lib/libz.so.* "${fakeroot_dir}/lib"
+    #ln -sfv ../../lib/$(readlink "${fakeroot_dir}/usr/lib/libz.so") "${fakeroot_dir}/usr/lib/libz.so"
+}
+# vim:set syntax=sh et:

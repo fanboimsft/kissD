@@ -1,0 +1,4 @@
+#!/bin/sh -e
+
+systemd-machine-id-setup
+rm -f /usr/lib/tmpfiles.d/systemd-nologin.conf

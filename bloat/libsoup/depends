@@ -1,0 +1,5 @@
+glib-networking
+gobject-introspection make
+libpsl
+libxml2
+sqlite make

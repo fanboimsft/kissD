@@ -1,0 +1,9 @@
+alsa-lib
+at-spi2-atk
+cups
+gtk+3
+libXcomposite
+libXcursor
+libXScrnSaver
+nss
+pango

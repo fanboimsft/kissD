@@ -1,0 +1,37 @@
+#!/bin/sh -e
+
+#make compatibility symlink
+ln -sfv ../lib/ld-linux-x86-64.so.2 /lib64/ld-lsb-x86-64.so.3
+	
+mkdir -v gcc-build
+cd gcc-build
+
+    ../configure \
+    --prefix=/usr \
+    --disable-werror \
+    --enable-kernel=3.2 \
+    --enable-stack-protector=strong \
+    --libdir=/usr/lib \
+    --libexecdir=/usr/lib \
+    --with-headers=/usr/include \
+    libc_cv_slibdir=/lib
+
+make
+make DESTDIR="$1" install
+
+# Remove all info files.
+rm -rf "$1/usr/share/info"
+
+cd ..
+
+mkdir -pv "$1"/etc
+cp -v nscd/nscd.conf "$1"/etc/nscd.conf
+mkdir -pv "$1"/var/cache/nscd
+cp -v nsswitch.conf "$1"/etc/nsswitch.conf
+cp -v ld.so.conf "$1"/etc/ld.so.conf
+	
+install -v -Dm644 nscd/nscd.tmpfiles "$1"/usr/lib/tmpfiles.d/nscd.conf
+install -v -Dm644 nscd/nscd.service "$1"/lib/systemd/system/nscd.service
+
+# Remove all info files.
+rm -rf "$/usr/share/info"

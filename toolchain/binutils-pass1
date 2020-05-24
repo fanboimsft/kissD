@@ -1,0 +1,63 @@
+pkgbuild_version=5
+_pkgbase=binutils
+pkgname="${_pkgbase}-pass1"
+pkgver=2.34
+
+_info_pages=(
+    'binutils.info'
+    'ld.info'
+    'bfd.info'
+    'gprof.info'
+    'as.info'
+    'configure.info'
+    'standards.info'
+)
+
+dependencies=(
+    "!$pkgname"
+)
+sources=(
+    "http://ftp.gnu.org/gnu/binutils/${_pkgbase}-${pkgver}.tar.xz"
+)
+sha1sums=(
+)
+
+lfs_me_prepare() {
+	tar -xf "${sources_dir}/${_pkgbase}-${pkgver}.tar.xz" -C "$build_dir"
+
+	cd "${build_dir}/${_pkgbase}-${pkgver}"
+
+    [ ! -z $LFS ] && [ ! -z $LFS_TGT ] || lfs_me_error "LFS and LFS_TGT environment variables aren't set!" false
+
+    mkdir -v "../${_pkgbase}-build"
+    cd "../${_pkgbase}-build"
+	"../${_pkgbase}-${pkgver}/configure" \
+        --prefix=/tools \
+        --with-lib-path=/tools/lib \
+        --with-sysroot="$LFS" \
+        --target="$LFS_TGT" \
+        --disable-nls \
+        --disable-werror
+}
+
+lfs_me_build() {
+	cd "${build_dir}/${_pkgbase}-build"
+    
+    make
+}
+
+lfs_me_check() {
+    return
+}
+
+lfs_me_install() {
+	cd "${build_dir}/${_pkgbase}-build"
+    case $(uname -m) in
+        x86_64) mkdir -pv "${fakeroot_dir}/tools/lib" 
+	ln -sv lib "${fakeroot_dir}/tools/lib64" ;;
+    esac
+	make DESTDIR="$fakeroot_dir" install
+
+}
+
+# vim:set syntax=sh et:

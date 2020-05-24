@@ -1,0 +1,43 @@
+pkgbuild_version=5
+pkgname=bash
+_basever=5.0
+pkgver="${_basever}"
+
+dependencies=(
+    "!$pkgname"
+	'glibc'
+)
+sources=(
+    "http://ftp.gnu.org/gnu/${pkgname}/${pkgname}-${_basever}.tar.gz"
+   
+)
+sha1sums=(
+ 8de012df1e4f3e91f571c3eb8ec45b43d7c747eb    
+)
+
+lfs_me_prepare() {
+	tar -xf "${sources_dir}/${pkgname}-${_basever}.tar.gz" -C "$build_dir"
+
+	cd "${build_dir}/${pkgname}-${_basever}"
+
+   	./configure --prefix=/tools --without-bash-malloc
+}
+
+lfs_me_build() {
+	cd "${build_dir}/${pkgname}-${_basever}"
+    make
+}
+
+lfs_me_check() {
+	cd "${build_dir}/${pkgname}-${_basever}"
+	make tests
+}
+
+lfs_me_install() {
+	cd "${build_dir}/${pkgname}-${_basever}"
+	make DESTDIR="$fakeroot_dir" install
+#	rm ${fakeroot_dir}/tools/share/info/dir
+    	ln -sv bash "${fakeroot_dir}/tools/bin/sh"
+
+}
+# vim:set syntax=sh et:

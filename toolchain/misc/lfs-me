@@ -1,0 +1,1152 @@
+#!/bin/bash
+
+# lfs-me: Linux From Scratch made ( more ) easy. A simple fakeroot based
+# package manager for LFS, heavily inspired by Archlinux.
+#
+# Copyright (C) 2014-2017  Max Bruckner (FSMaxB)
+#
+# Permission to use, copy, modify, and/or distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+# REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+# FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+# INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+# LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+# OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+# PERFORMANCE OF THIS SOFTWARE.
+
+#catch SIGINT (ctrl-c) to do cleanup
+trap lfs_me_ctrl_c INT
+
+#force english output
+export LC_ALL=C
+
+lfs_me_ctrl_c() {
+	lfs_me_error "Ctrl-C pressed." false
+}
+
+start_time_s=$(date +%s)
+start_time_ns=$(date +%N)
+
+#Cpu Cores for Make jobs
+jobs=$(grep "^processor" /proc/cpuinfo | wc -l)
+
+#color codes
+color_red='\e[0;31m'      #Red
+color_green='\e[0;32m'    #Green
+color_yellow='\e[0;33m'   #Yellow
+color_blue='\e[0;34m'     #Blue
+color_bred='\e[1;31m'     #Bold red
+color_bgreen='\e[1;32m'   #Bold green
+color_byellow='\e[1;33m'  #Bold yellow
+color_bblue='\e[1;34m'    #Bold blue
+color_reset='\e[0m'       #Reset color
+
+#functions
+lfs_me_disable_color() {
+    color_red=''
+    color_green=''
+    color_yellow=''
+    color_blue=''
+    color_bred=''
+    color_bgreen=''
+    color_byellow=''
+    color_bblue=''
+    color_reset=''
+}
+
+lfs_me_help() {
+    echo -e "${color_blue}LFS-ME ( Linux From Scratch made [more] easy ), a simple fakeroot based package manager for Linux from Scratch.\n"
+
+    echo -e "${color_bblue}Usage:"
+    echo -e "${color_blue}${0} ${color_bblue}mode [Options]${color_reset}\n"
+
+    echo -e "${color_bblue}Modes:"
+    echo -e "${color_bblue} backuplist   ${color_blue}                         List all backup files."
+    echo -e "${color_bblue} backupmerge  ${color_blue}                         Find all backup files and ask how to merge them."
+    echo -e "${color_bblue} build        ${color_blue}PKGBUILD-file            Build the package specified by PKGBUILD-file"
+    echo -e "${color_bblue} checkdeps    ${color_blue}PKGBUILD-file            Check if all dependencies are met."
+    echo -e "${color_bblue} checkdeps    ${color_blue}package.pkg              Check if all dependencies are met."
+    echo -e "${color_bblue} checkdeps    ${color_blue}package                  Check if all dependencies are met."
+    echo -e "${color_bblue} checkdeps    ${color_blue}package pkgver           Check if all dependencies are met."
+    echo -e "${color_bblue} rebuild      ${color_blue}package.pkg              Rebuild a package from an existing one."
+    echo -e "${color_bblue} rebuild      ${color_blue}pkgname                  Rebuild a package from an existing one."
+    echo -e "${color_bblue} rebuild      ${color_blue}pkgname pkgver           Rebuild a package from an existing one."
+    echo -e "${color_bblue} install      ${color_blue}package.pkg              Install a package to system and index"
+    echo -e "${color_bblue} remove       ${color_blue}package.pkg              Remove a package from system and index"
+    echo -e "${color_bblue} remove       ${color_blue}pkgname pkgver           Remove a package from system and index"
+    echo -e "${color_bblue} remove       ${color_blue}pkgname                  Remove a package from system and index"
+    echo -e "${color_bblue} indexadd     ${color_blue}package.pkg              Add a package to the index"
+    echo -e "${color_bblue} indexremove  ${color_blue}package.pkg              Remove a package from the index"
+    echo -e "${color_bblue} indexremove  ${color_blue}pkgname pkgver           Remove a package from the index"
+    echo -e "${color_bblue} indexremove  ${color_blue}pkgname                  Remove a package from the index"
+    echo -e "${color_bblue} indexlist    ${color_blue}                         List all package in the index"
+    echo -e "${color_bblue} indexlist    ${color_blue}searchterm               Search for packages in the index"
+    echo -e "${color_bblue} list         ${color_blue}package.pkg              List all files of a package"
+    echo -e "${color_bblue} list         ${color_blue}pkgname                  List all files of a package"
+    echo -e "${color_bblue} list         ${color_blue}pkgname pkgver           List all files of a package"
+    echo -e "${color_bblue} check        ${color_blue}package.pkg              Verify checksums of files installed by package"
+    echo -e "${color_bblue} check        ${color_blue}pkgname pkgver           Verify checksums of files installed by package"
+    echo -e "${color_bblue} check        ${color_blue}pkgname                  Verify checksums of files installed by package"
+    echo -e "${color_bblue} checksums    ${color_blue}PKGBUILD-file            Create SHA1 sums for all source files"
+    echo -e "${color_bblue} download     ${color_blue}PKGBUILD-file            Download source files"
+    echo -e "${color_bblue} owner        ${color_blue}file                     List all packages that own a file.\n"
+
+    echo -e "${color_bblue}Options:"
+    echo -e "${color_bblue} -b | --build-dir         ${color_blue}Specify the build directory"
+    echo -e "${color_bblue} -D | --debug             ${color_blue}Enable debug mode"
+    echo -e "${color_bblue} -f | --fakeroot-dir      ${color_blue}Specify the fakeroot directory"
+    echo -e "${color_bblue} -h | --help              ${color_blue}Show this help"
+    echo -e "${color_bblue} -i | --index-dir         ${color_blue}Specify index directory"
+    echo -e "${color_bblue} -l | --log-dir           ${color_blue}Specify log directory"
+    echo -e "${color_bblue}    | --no-checks         ${color_blue}Don't run checks"
+    echo -e "${color_bblue}    | --no-color          ${color_blue}Disable color output"
+    echo -e "${color_bblue}    | --no-downloads      ${color_blue}Don't download sources"
+    echo -e "${color_bblue}    | --ignore-checksums  ${color_blue}Don't verify checksums"
+    echo -e "${color_bblue} -p | --prefix            ${color_blue}Set install prefix"
+    echo -e "${color_bblue} -s | --sources           ${color_blue}Set directory with source tarballs"
+    echo -e "${color_bblue} -t | --show-time         ${color_blue}Show execution time at the end."
+    echo -e "${color_bblue}    | --no-time           ${color_blue}Don't show execution time at the end."
+    echo -e "${color_bblue}    | --no-cert-check     ${color_blue}Don't check SSL certificates."
+    echo -e "${color_bblue}    | --no-logs           ${color_blue}Don't log output. (needed for menus during build)"
+    echo -e "${color_bblue}    | --version           ${color_blue}Show version number."
+    echo -e "${color_reset}"
+}
+
+lfs_me_sources() {
+    if [[ "$download_sources" == "true" ]]
+    then
+        #Download missing files
+        if [[ ! -z "${sources+x}" ]]
+        then
+            for url in ${sources[@]}
+            do
+				#get filename
+				if echo "$url" | grep -qE "::(https?|ftp)://"
+				then
+					filename="$(echo "$url" | awk -F '::' '{print $1}')"
+					url="$(echo "$url" | sed 's/^.*:://')"
+				else
+					filename="$(basename "$url")"
+				fi
+
+                # Does the file exist?
+                if [[ ! -f "${sources_dir}/${filename}" ]]
+                then
+                    if echo "$url" | grep -qE '(https?|ftp)://.*'    #URL?
+                    then
+                        if ! sh -c "wget '${url}' -O '${sources_dir}/${filename}' ${wget_flags}"
+                        then
+                            rm "${sources_dir}/${filename}"
+                            lfs_me_error "Download of '$filename' failed!" false
+                        fi
+                    else
+                        lfs_me_error "The source '${url}' doesn't exist!" false
+                    fi
+                fi
+            done
+        else
+            echo -e "${color_bred}Please provide a 'sources' array in the PKGBUILD file.${color_reset}"
+        fi
+    fi
+
+    if [[ "$verify_checksums" == "true" ]]
+    then
+        #Verify all the checksums
+        if [[ ! -z "${sha1sums+x}" ]]
+        then
+            if [[ "${#sources[@]}" != "${#sha1sums[@]}" ]]
+            then
+                lfs_me_error "The number of source files and SHA1 sums differ." false
+            fi
+           
+            #Now actually verify the checksums
+			for i in $(seq 0 $((${#sources[@]} - 1)))
+            do
+				#get filename
+				if echo "${sources[$i]}" | grep -qE "::(https?|ftp)://"
+				then
+					filename="$(echo "${sources[$i]}" | awk -F '::' '{print $1}')"
+					url="$(echo "${sources[$i]}" | sed 's/^.*:://')"
+				else
+					filename="$(basename "${sources[$i]}")"
+				fi
+
+                sum="$(sha1sum "${sources_dir}/${filename}" | grep -o -E '^[0-9a-f]{40}')"
+                if [[ "$sum" == "${sha1sums[$i]}" ]]
+                then
+                    echo "${filename} OK"
+                else
+                    lfs_me_error "The SHA1 sum for '${filename}' doesn't match." false
+                fi
+            done
+        else
+            echo -e "${color_bred}Please provide a 'sha1sums' array in the PKGBUILD file.${color_reset}"
+        fi
+    fi
+}
+
+#Creates SHA1 checksums for each file in 'sources'
+lfs_me_checksums() {
+
+    echo "sha1sums=("
+    for url in ${sources[@]}
+    do
+		#get filename
+		if echo "$url" | grep -qE "::(https?|ftp)://"
+		then
+			filename="$(echo "$url" | awk -F '::' '{print $1}')"
+			url="$(echo "$url" | sed 's/^.*:://')"
+		else
+			filename="$(basename "$url")"
+		fi
+
+		sha1sum "${sources_dir}/${filename}" | grep -o -E '^[0-9a-f]{40}'
+    done
+    echo ")"
+}
+
+lfs_me_pause() {
+    read -n1 -r -p "Press any key to continue..."
+}
+
+#Print an error message and exit. If $2 is true it also displays the help output
+lfs_me_error() {
+    echo -e "${color_bred}ERROR: ${1}${color_reset}" >&2
+	[ -z "$2" ] || "$2" && lfs_me_help
+    lfs_me_cleanup
+	lfs_me_show_time
+    exit 1
+}
+
+lfs_me_message() {
+    echo -e "${color_bgreen}${1}${color_reset}"
+}
+
+lfs_me_cleanup() {
+    #clean up tempfiles
+	if [[ "$debug" == "true" ]]; then lfs_me_pause; fi
+    rm -rf "$temp_dir"
+}
+
+lfs_me_package() {
+    #create metadata
+    cd "$fakeroot_dir"
+    find . -type f | grep -ve '^\./FILES$' > "${fakeroot_dir}/FILES"
+    find . -type l > "${fakeroot_dir}/LINKS"
+    find . -type d > "${fakeroot_dir}/DIRS"
+    find . -type f -exec sha1sum {} \; | grep -ve "\\./sha1sums$" > "${fakeroot_dir}/sha1sums"
+    #remove "." from the beginning of pathnames
+    sed -i -e "s/^\\.//" "${fakeroot_dir}/FILES"
+    sed -i -e "s/^\\.//" "${fakeroot_dir}/DIRS"
+    sed -i -e "s/^\\.//" "${fakeroot_dir}/LINKS"
+
+    #create package
+    cd "$current_dir"
+    cp "${temp_dir}/PKGBUILD" "${fakeroot_dir}/"
+    fakeroot tar -cf "${pkgname}-${pkgver}.pkg" -I 'xz --threads=0 -c -z -' -C "$fakeroot_dir" .
+
+    #clean build directories
+    #[ "$build_dir" ] && [ "$fakeroot_dir" ] && rm -rf ${build_dir}/* ${fakeroot_dir}/*
+    #keep build_dir sources for git packages
+     [ "$fakeroot_dir" ] && rm -rf ${fakeroot_dir}/*
+}
+
+lfs_me_index_versioncheck() {
+	[ -f "${index_dir}/version" ] && [ "$(cat "${index_dir}/version")" -eq 2 ] && return
+
+    [ "$(find "${index_dir}" -maxdepth 1 -type d | grep -v "^${index_dir}\$" | wc -l)" -eq 0 ] && echo 2 > "${index_dir}/version" || lfs_me_error "Index has wrong version. Version 2 expected!" false
+}
+
+lfs_me_indexadd() {
+    lfs_me_message "Adding to package index"
+	lfs_me_index_versioncheck
+	if [[ "$debug" == "true" ]]; then lfs_me_pause; fi
+    index_entry="${index_dir}/${pkgname}/${pkgver}"
+    mkdir -p "$index_entry"
+    cp "$temp_dir"/{PKGBUILD,sha1sums,FILES,DIRS,LINKS} "$index_entry"
+}
+
+lfs_me_indexremove() {
+    lfs_me_message "Removing from package index"
+	lfs_me_index_versioncheck
+	if [[ "$debug" == "true" ]]; then lfs_me_pause; fi
+    #get name of directory
+    index_entry="${index_dir}/${pkgname}/${pkgver}"
+
+    #Remove files/dirs from index
+    rm "$index_entry"/{PKGBUILD,sha1sums,FILES,DIRS,LINKS}
+    rmdir "$index_entry"
+    rmdir --ignore-fail-on-non-empty "${index_dir}/${pkgname}"
+}
+
+#extract and load a package file, returns the number of arguments to shift
+#for some reason shift suddenly stopped working if not done like that
+lfs_me_load_package_files() {
+	command_name="$1"
+    if [[ -z "$2" ]]
+    then
+        lfs_me_error "Please specify a package for '${command_name}'" true
+    fi
+
+    #extract meta files
+    if tar -xJf "$2" -C "$temp_dir" ./sha1sums ./FILES ./DIRS ./LINKS ./PKGBUILD 2> /dev/null
+    then
+        package_file=$2
+        shift_value=1
+    else
+		lfs_me_index_versioncheck
+        pkgname="$2"
+        pkgver="$3"
+
+		if [[ ( -z "$pkgver" ) || ( "${pkgver:0:1}" == "-" ) ]]
+		then
+			case "$(find "${index_dir}/${pkgname}" -type d | grep -v "^${index_dir}/${pkgname}\$" | wc -l)" in
+				0)
+					lfs_me_error "Can't find package '${pkgname}'" false
+					;;
+				1)
+					index_entry="$(find "${index_dir}/${pkgname}" -type d | grep -v "^${index_dir}/${pkgname}\$")"
+					pkgver="$(basename "${index_entry}")"
+					;;
+				*)
+					lfs_me_error "Package '${pkgname}' is ambiguos" false
+					;;
+			esac
+			shift_value=1
+		else
+			index_entry="${index_dir}/${pkgname}/${pkgver}"
+			shift_value=2
+		fi
+
+        if  [[ ! -d "$index_entry" ]]
+        then
+            lfs_me_error "Could not load package files!" false
+        fi
+
+        cp "$index_entry"/{sha1sums,FILES,DIRS,LINKS,PKGBUILD} "$temp_dir"
+    fi
+    pkgbuild_file="${temp_dir}/PKGBUILD"
+	lfs_me_load_pkgbuild
+    return "$shift_value"
+}
+
+#Get a list of every installed package
+lfs_me_get_installed_packages() {
+	lfs_me_index_versioncheck
+	[ -f "${temp_dir}/ALL_PACKAGES" ] && rm "${temp_dir}/ALL_PACKAGES"
+	touch "${temp_dir}/ALL_PACKAGES"
+
+	for package in $( ls "${index_dir}")
+	do
+		[ -d "${index_dir}/${package}" ] && for version in $( ls "${index_dir}/${package}")
+		do
+			echo -e "${package}/${version}" >> "${temp_dir}/ALL_PACKAGES"
+		done
+	done
+}
+
+#Get a list of every installed file
+lfs_me_get_installed_files() {
+	lfs_me_index_versioncheck
+	#if $1 is false, the current package ( pkgname, pkgver ) is not included in the file list
+	list_current_package=$1
+
+	[ -f "${temp_dir}/EVERYTHING" ] && rm "${temp_dir}/EVERYTHING"
+	[ -f "${temp_dir}/ALL_FILES" ] && rm "${temp_dir}/ALL_FILES"
+	[ -f "${temp_dir}/ALL_DIRS" ] && rm "${temp_dir}/ALL_DIRS"
+	[ -f "${temp_dir}/ALL_LINKS" ] && rm "${temp_dir}/ALL_LINKS"
+	touch "${temp_dir}/"{EVERYTHING,ALL_FILES,ALL_DIRS,ALL_LINKS}
+
+	lfs_me_get_installed_packages
+	for package in $( cat "${temp_dir}/ALL_PACKAGES" )
+	do
+		if [[ ($list_current_package == "true") || ("${pkgname}/${pkgver}" != "$package") ]]
+		then
+			cat "${index_dir}/${package}/FILES" >> "${temp_dir}/ALL_FILES"
+			cat "${index_dir}/${package}/DIRS" >> "${temp_dir}/ALL_DIRS"
+			cat "${index_dir}/${package}/LINKS" >> "${temp_dir}/ALL_LINKS"
+			cat "${index_dir}/${package}/"{FILES,DIRS,LINKS} >> "${temp_dir}/EVERYTHING"
+		fi
+	done
+	unset list_current_package
+}
+
+lfs_me_load_pkgbuild() {
+	source "${temp_dir}/PKGBUILD"
+	[ ! -z "$pkgbuild_version" ] && [ "$pkgbuild_version" -eq 5 ] || lfs_me_error "PKGBUILD has wrong version. Version 5 expected." false
+}
+
+#Checks if the necessary dependencies are installed
+lfs_me_check_dependencies() {
+	ignore_current="$1"	#true: ignore conflicts with current package, false: don't ignore
+	lfs_me_get_installed_packages
+	dependencies_met=true
+	for dep in "${dependencies[@]}"
+	do
+		conflict=false
+		package="$(echo "$dep" | awk -F '[><]?=?' '{ print $1 }')"
+		version="$(echo "$dep" | awk -F '[><]?=?' '{ print $2 }')"
+		comparator="$(echo "$dep" | grep -o -E '[><]?=?')"
+
+		#if dependency start with '!', it's a conflict instead of a dependency
+		[ "${package:0:1}" == '!' ] && package="${package:1}" && conflict=true
+
+		IFS='/' read -a installed <<< "$(cat "${temp_dir}/ALL_PACKAGES" | grep "^$package/")"
+		IFS=' ' read -a installed_versions <<< $(cat "${temp_dir}/ALL_PACKAGES" | grep "^$package/" | awk -F '/' '{print $2}')
+
+		if [[ -z "${installed[0]}" ]]
+		then	#package not installed
+			if [[ "$conflict" == "true" ]]
+			then
+				echo -e "${color_green}!${package}: NOT INSTALLED${color_reset}"
+			else
+				dependencies_met=false
+				echo -e "${color_red}${package}: MISSING${color_reset}"
+			fi
+		elif [[ -z "$version" ]]
+		then #dependency is single package name without version requirement
+			if [[ "$conflict" == "true" ]]
+			then
+				echo -e "${color_red}!${package}: CONFLICT${color_reset}"
+				dependencies_met=false
+				if [[ ($ignore_current == "true") && ("$pkgname" == "$package") ]]
+				then
+					dependencies_met=true
+					echo "ignoring conflict"
+				fi
+			else
+				echo -e "${color_green}${package}: FOUND${color_reset}"
+			fi
+		else
+			#loop through all versions of the installed package
+			#There might be multiple versions in case of python for example (2.7 and 3)
+			for installed_version in ${installed_versions[@]}
+			do
+				#use sort's version sorting to check which is newer
+				older=true
+				echo -e "$version\n${installed_version}" | sort -VC && older=false
+				newer=true
+				echo -e "${installed_version}\n$version" | sort -VC && newer=false
+
+				case "$comparator" in
+					">")
+						if [[ "$newer" == "true" ]]; then
+							dep_met=true
+						else
+							dep_met=false
+						fi
+						;;
+					"<")
+						if [[ "$older" == "true" ]]; then
+							dep_met=true
+						else
+							dep_met=false
+						fi
+						;;
+					"=")
+						if [[ ("$newer" == "false") && ("$older" == "false") ]]; then
+							dep_met=true
+						else
+							dep_met=false
+						fi
+						;;
+					">=")
+						if [[ "$older" == "false" ]]; then
+							dep_met=true
+						else
+							dep_met=false
+						fi
+						;;
+					"<=")
+						if [[ "$newer" == "false" ]]; then
+							dep_met=true
+						else
+							dep_met=false
+						fi
+						;;
+					*)
+						lfs_me_error "Unknown comparator '$comparator'!" false
+				esac
+				if [[ "$dep_met" == "true" ]]; then
+					break
+				fi
+			done
+			if [[ "$conflict" == "true" ]]
+			then
+				if [[ "$dep_met" == "true" ]]; then
+					echo -e "${color_red}${dep}: CONFLICT (${installed_version})${color_reset}"
+					dependencies_met=false
+				elif [[ "$dep_met" == "false" ]]; then
+					echo -e "${color_green}${dep}: NOT INSTALLED${color_reset}"
+					dependencies_met=true
+				fi
+				if [[ ($ignore_current == "true") && ("$pkgname" == "$package") ]]
+				then
+					echo "ignoring conflict"
+					dependencies_met=true
+				fi
+			else
+				if [[ "$dep_met" == "true" ]]; then
+					echo -e "${color_green}${dep}: FOUND (${installed_version})${color_reset}"
+					dependencies_met=true
+				elif [[ "$dep_met" == "false" ]]; then
+					echo -e "${color_red}${dep}: WRONG VERSION(S) (${installed_versions[@]})${color_reset}"
+					dependencies_met=false
+				fi
+			fi
+		fi
+	done
+	! $dependencies_met && lfs_me_error "Dependencies aren't met!" false
+}
+
+lfs_me_show_time() {
+	stop_time_s=$(date +%s)
+	stop_time_ns=$(date +%N)
+	start_time="${start_time_s}.${start_time_ns}"
+	stop_time="${stop_time_s}.${stop_time_ns}"
+	diff_time="$( echo "$stop_time" - "$start_time" | bc )"
+	diff_time_mins="$( echo "$diff_time" / 60 | bc)"
+	diff_time_s="$( echo "$diff_time" % 60 | bc)"
+	$show_time && echo "time: ${diff_time_mins}m $(echo $diff_time_s | awk '{printf "%.3f", $1}')s"
+}
+
+#install a package ( doesn't check dependencies, doesn't add it to the index and doesn't run lfs_me_preinstall and lfs_me_postinstall)
+lfs_me_install_package() {
+	package_file="$1"
+
+	#extract files
+	lfs_me_message "Extracting package"
+	if [[ "$debug" == "true" ]]; then lfs_me_pause; fi
+	mkdir -pv "${fakeroot_dir}/"
+	tar -xJf "$package_file" -C "${fakeroot_dir}/" --exclude ./PKGBUILD --exclude ./sha1sums --exclude ./FILES --exclude ./DIRS --exclude ./LINKS
+
+	#install files with rsync
+	lfs_me_message "Installing files"
+	if [[ "$debug" == "true" ]]; then lfs_me_pause; fi
+	if [[ "$do_logs" == "true" ]]
+	then
+		rsync -rlpgoDK "${fakeroot_dir}/" /${install_prefix} 2>&1 | tee "${log_dir}/last-install.log"
+	else
+		rsync -rlpgoDK "${fakeroot_dir}/" /${install_prefix}
+	fi
+	
+	[ "$fakeroot_dir" ] && rm -rf ${fakeroot_dir}/*
+}
+
+#removes a package (doesn't remove it from the index and doesn't run lfs_me_preremove and lfs_me_postremove )
+lfs_me_remove_package() {
+	lfs_me_message "Getting list of installed files"
+	if [[ "$debug" == "true" ]]; then lfs_me_pause; fi
+	lfs_me_get_installed_files false    #false: don't include files from the current package
+
+	#deleting files
+	lfs_me_message "Deleting"
+	if [[ "$debug" == "true" ]]; then lfs_me_pause; fi
+	cd "$temp_dir"
+	for file in $( cat "${temp_dir}/FILES" )
+	do
+		if grep -q "^${file}$" "${temp_dir}/EVERYTHING"
+		then
+			echo "Didn't remove file '${install_prefix}/${file}', still needed."
+		else
+			rm -f "${install_prefix}/${file}"
+		fi
+	done
+	for directory in $( sort -r "${temp_dir}/DIRS" )  #Sort in order to remove subdirs first
+	do
+		if grep -q "^${directory}$" "${temp_dir}/EVERYTHING"
+		then
+			echo "Didn't remove directory '${install_prefix}/${directory}', still needed."
+		else
+			rmdir --ignore-fail-on-non-empty "${install_prefix}/${directory}"
+		fi
+	done
+	for link in $( cat "${temp_dir}/LINKS" )
+	do
+		#only remove broken symlinks
+		if test -r "${install_prefix}/${link}"
+		then
+			echo "Didn't remove link '${install_prefix}/${link}', still needed."
+		else
+			rm -f "${install_prefix}/${link}"
+		fi
+	done
+}
+
+#check for conflicting files
+lfs_me_check_conflicts() {
+	#prevent everything in the package from overwriting any existing file
+	for file in $(cat "${temp_dir}/"{FILES,DIRS,LINKS})
+	do
+		if [[ -f "${install_prefix}/${file}" ]]
+		then
+			in_overwrite=false
+			for element in "${overwrite[@]}"
+			do
+				if [[ "$(readlink -f "${install_prefix}/${element}")" == "$(readlink -f "${install_prefix}/${file}")" ]]; then
+					in_overwrite=true
+				fi
+			done
+			if [[ "$in_overwrite" == "false" ]]; then
+				lfs_me_error "Conflicting file! '${install_prefix}/${file}' already exists in the filesystem!" false
+			fi
+			echo "Overwriting '${install_prefix}/${file}'!"
+		fi
+
+	done
+
+	#TODO I have no idea right now how to handle links and directories appropriately
+}
+
+#backup config files from backup array in the PKGBUILD
+lfs_me_backup() {
+	for file in ${backup[@]}
+	do
+		[ -f "${install_prefix}/${file}" ] && mv "${install_prefix}/${file}" "${install_prefix}/$(dirname "$file")/$(basename "$file").lfs-me-backup" && echo "Backed up '${install_prefix}/${file}' to '${install_prefix}/${file}.lfs-me-backup'"
+	done
+}
+
+#List and merge backup files
+lfs_me_backuplist() {
+	do_merge="$1"	#true: merge, false: don't merge
+	for file in $(find "$install_prefix/" -type f -name '*.lfs-me-backup' 2> /dev/null)
+	do
+		if [[ "$do_merge" == "true" ]]
+		then
+			if [[ -f "${file/.lfs-me-backup/}" ]]
+			then	#does the original still exist
+				echo "Backup file for '${file/.lfs-me-backup/}'"
+				echo "> (m)erge, (s)kip, (r)emove backup, (o)verwrite new"
+				read -n1 choice
+				case "$choice" in
+					m)
+						$merge_tool "$file" "${file/.lfs-me-backup/}"
+						rm -v "$file"
+						;;
+					r)
+						rm -v "$file"
+						;;
+					o)
+						mv -v "$file" "${file/.lfs-me-backup/}"
+						;;
+					s|*)
+						echo Skipping
+						;;
+				esac
+			else
+				echo "Backup file for '${file/.lfs-me-backup/}'"
+				mv -v "${file}" "${file/.lfs-me-backup/}"
+				lfs_me_pause
+			fi
+		else
+			echo "Backup file for '${file/.lfs-me-backup/}'"
+		fi
+	done
+}
+
+#--------------------------------------------------------------------------------
+#Those functions are supposed to be overloaded by the PKGBUILD
+lfs_me_prepare() {
+	tar -xf "${sources_dir}/${pkgname}-${pkgver}.tar.gz" -C "$build_dir"
+
+	cd "${build_dir}/${pkgname}-${pkgver}"
+
+	./configure --prefix=/usr
+}
+
+lfs_me_build() {
+	cd "${build_dir}/${pkgname}-${pkgver}"
+	make -j ${jobs}
+}
+
+lfs_me_check() {
+	cd "${build_dir}/${pkgname}-${pkgver}"
+	make -j ${jobs} check
+}
+
+lfs_me_install() {
+	cd "${build_dir}/${pkgname}-${pkgver}"
+	make -j ${jobs} DESTDIR="${fakeroot_dir}" install
+}
+
+lfs_me_preinstall() {
+	return
+}
+
+lfs_me_postinstall() {
+	return
+}
+
+lfs_me_preremove() {
+	return
+}
+
+lfs_me_postremove() {
+	return
+}
+#--------------------------------------------------------------------------------
+
+#initialize variables
+debug=false
+temp_dir="$(mktemp -d)"
+build_dir="${temp_dir}/build"
+fakeroot_dir="${temp_dir}/fakeroot"
+index_dir="/var/lfs-me/index"
+log_dir="/var/log/lfs-me"
+current_dir="$( pwd )"
+run_checks=true
+download_sources=true
+verify_checksums=true
+show_color=true
+install_prefix=""
+sources_dir="$current_dir"
+mode="undefined"
+show_help=false
+show_time=false
+wget_flags=""
+merge_tool="vimdiff"
+do_logs=true
+
+#load configuration file
+[ -f ~/.lfs-me ] && source ~/.lfs-me
+
+if [[ "$show_color" != "true" ]]
+then
+    lfs_me_disable_color
+fi
+
+#Parse all options
+for (( i=1; i<=$#; i++ ))
+do
+    case "${!i}" in
+        -b | --build-dir)
+			((i++))
+            build_dir="${!i}"
+			[ -d "$build_dir" ] || lfs_me_error "Build directory '${build_dir}' not found!" true
+            ;;
+        -D | --debug)
+            debug=true
+			set -x
+            ;;
+        -f | --fakeroot-dir)
+			((i++))
+            fakeroot_dir="${!i}"
+			[ -d "$fakeroot_dir" ] || lfs_me_error "Fakeroot directory '${fakeroot_dir}' not found!" true
+            ;;
+        -h | --help)
+			show_help=true
+            ;;
+        -i | --index-dir)
+            ((i++))
+            index_dir="${!i}"
+			[ -d "$index_dir" ] || lfs_me_error "Package index '${index_dir}' not found!" true
+            ;;
+		-l | --log-dir)
+			((i++))
+			log_dir="${!i}"
+			[ -d "$log_dir" ] || lfs_me_error "Log directory '${log_dir} not found!'" true
+			;;
+        --no-checks)
+            run_checks=false
+            ;;
+        --no-color)
+            lfs_me_disable_color
+            ;;
+        --no-downloads)
+            download_sources=false
+            ;;
+        --ignore-checksums)
+            verify_checksums=false
+            ;;
+        -p | --prefix)
+            ((i++))
+            install_prefix="${!i}"
+			[ -d "$install_prefix" ] || lfs_me_error "Install prefix '${install_prefix}' not found!" true
+            ;;
+        -s | --sources)
+            ((i++))
+            sources_dir="${!i}"
+			[ -d "$sources_dir" ] || lfs_me_error "Sources dir '${sources_dir}' not found!" true
+            ;;
+		-t | --show-time)
+			show_time=true
+			;;
+		--no-time)
+			show_time=false
+			;;
+		--no-cert-check)
+			wget_flags="--no-check-certificate"
+			;;
+		--no-logs)
+			do_logs=false
+			;;
+		--version)
+			echo 3.1.3
+			lfs_me_cleanup
+			exit 0
+			;;
+        -*)
+            lfs_me_error "Unknown option '${!i}'" true
+            ;;
+    esac
+done
+unset i
+
+#show help
+if [[ "$show_help" == "true" ]]
+then
+	lfs_me_help
+	lfs_me_cleanup
+	lfs_me_show_time
+	exit 0
+fi
+
+#Create all the necessary directories
+mkdir -p "$install_prefix" "$build_dir" "$fakeroot_dir" "$sources_dir" "$index_dir" "$log_dir" 2> /dev/null
+
+#Get absolute paths for directories ( so cd'ing to them works from everywhere )
+install_prefix="$(readlink -f "$install_prefix")"
+build_dir="$(readlink -f "$build_dir")"
+fakeroot_dir="$(readlink -f "$fakeroot_dir")"
+sources_dir="$(readlink -f "$sources_dir")"
+index_dir="$(readlink -f "$index_dir")"
+log_dir="$(readlink -f "$log_dir")"
+
+#Parse Arguments
+while :
+do
+    case "$1" in
+		backuplist)
+			lfs_me_backuplist false
+			lfs_me_cleanup
+			lfs_me_show_time
+			exit 0
+			;;
+		backupmerge)
+			lfs_me_backuplist true
+			lfs_me_cleanup
+			lfs_me_show_time
+			exit 0
+			;;
+        build)
+			[ "$mode" != "undefined" ] && lfs_me_error "Only one action can be performed!" true
+            mode="build"
+            pkgbuild_file="$2"
+			[ -f "$pkgbuild_file" ] || lfs_me_error "PKGBUILD file '${pkgbuild_file}' not found!" true
+            shift 2
+            ;;
+		checkdeps)
+			[ "$mode" != "undefined" ] && lfs_me_error "Only one action can be performed!" true
+			if file -b "$2" | grep -q '\stext'
+			then
+				pkgbuild_file="$2"
+				cp "$pkgbuild_file" "${temp_dir}/PKGBUILD"
+				lfs_me_load_pkgbuild
+				shift 1
+			else
+				lfs_me_load_package_files "$@"
+				shift "$shift_value"
+			fi
+			lfs_me_check_dependencies false
+			lfs_me_cleanup
+			lfs_me_show_time
+			exit 0
+			;;
+		rebuild)
+			[ "$mode" != "undefined" ] && lfs_me_error "Only one action can be performed!" true
+			lfs_me_load_package_files "$@"
+			shift "$shift_value"
+			mode="build"
+			;;
+        download)
+			[ "$mode" != "undefined" ] && lfs_me_error "Only one action can be performed!" true
+            mode="download"
+            pkgbuild_file="$2"
+			[ -f "$pkgbuild_file" ] || lfs_me_error "PKGBUILD file '${pkgbuild_file}' not found!" true
+            shift 2
+            ;;
+        indexadd)
+			[ "$mode" != "undefined" ] && lfs_me_error "Only one action can be performed!" true
+            lfs_me_load_package_files "$@"
+            shift "$shift_value"
+            mode="indexadd"
+            ;;
+        indexremove)
+			[ "$mode" != "undefined" ] && lfs_me_error "Only one action can be performed!" true
+            lfs_me_load_package_files "$@"
+            shift "$shift_value"
+            mode="indexremove"
+            ;;
+        indexlist)
+			[ "$mode" != "undefined" ] && lfs_me_error "Only one action can be performed!" true
+            indexlist_search=""
+            case "$2" in
+                -*)
+                    ;;
+                *)
+                    indexlist_search="$2"
+                    shift
+                    ;;
+            esac
+
+            mode="indexlist"
+            shift
+            ;;
+		list)
+			[ "$mode" != "undefined" ] && lfs_me_error "Only one action can be performed!" true
+			lfs_me_load_package_files "$@"
+			shift "$shift_value"
+			mode=list
+			;;
+        install)
+			[ "$mode" != "undefined" ] && lfs_me_error "Only one action can be performed!" true
+            lfs_me_load_package_files "$@"
+            shift "$shift_value"
+            mode="install"
+            ;;
+        remove)
+			[ "$mode" != "undefined" ] && lfs_me_error "Only one action can be performed!" true
+            lfs_me_load_package_files "$@"
+            shift "$shift_value"
+            mode="remove"
+            ;;
+        check)
+			[ "$mode" != "undefined" ] && lfs_me_error "Only one action can be performed!" true
+            lfs_me_load_package_files "$@"
+            shift "$shift_value"
+            mode="check"
+            ;;
+        checksums)
+			[ "$mode" != "undefined" ] && lfs_me_error "Only one action can be performed!" true
+            mode="checksums"
+            pkgbuild_file="$2"
+			[ -f "$pkgbuild_file" ] || lfs_me_error "PKGBUILD file '${pkgbuild_file}' not found!" true
+            shift 2
+            ;;
+		owner)
+			[ "$mode" != "undefined" ] && lfs_me_error "Only one action can be performed!" true
+			filename="$(readlink -f "$2")"
+			mode=owner
+			shift 2
+			;;
+		-*)
+			shift
+			;;
+        *)
+            break
+            ;;
+    esac
+done
+
+
+case "$mode" in
+	build)
+        cp "$pkgbuild_file" "${temp_dir}/PKGBUILD"
+		lfs_me_load_pkgbuild
+
+		lfs_me_message "Checking dependencies"
+		lfs_me_check_dependencies true
+        
+        lfs_me_message "Getting sources"
+        lfs_me_sources
+
+	    lfs_me_message "Preparing source"
+		if [[ "$debug" == "true" ]]; then lfs_me_pause; fi
+		if [[ "$do_logs" == "true" ]]
+		then
+			lfs_me_prepare 2>&1 | tee "${log_dir}/last-prepare.log"
+			[ ! ${PIPESTATUS[0]} -eq 0 ] && lfs_me_error "Non zero exit status." false
+		else
+			true
+			lfs_me_prepare || lfs_me_error "Non zero exit status." false
+		fi
+        
+	    lfs_me_message "Building"
+		if [[ "$debug" == "true" ]]; then lfs_me_pause; fi
+		if [[ "$do_logs" == "true" ]]
+		then
+			lfs_me_build 2>&1 | tee "${log_dir}/last-build.log"
+			[ ! ${PIPESTATUS[0]} -eq 0 ] && lfs_me_error "Non zero exit status." false
+		else
+			true
+			lfs_me_build || lfs_me_error "Non zero exit status." false
+		fi
+       
+        if [[ "$run_checks" == "true" ]]
+        then
+            lfs_me_message "Running checks"
+			if [[ "$debug" == "true" ]]; then lfs_me_pause; fi
+			if [[ "$do_logs" == "true" ]]
+			then
+				lfs_me_check 2>&1 | tee "${log_dir}/last-check.log"
+			else
+				lfs_me_check
+			fi
+        fi
+        
+	    lfs_me_message "Installing to fakeroot"
+		if $debug; then lfs_me_pause; fi
+		if [[ "$do_logs" == "true" ]]
+		then
+			lfs_me_install 2>&1 | tee "${log_dir}/last-install.log"
+			[ ! ${PIPESTATUS[0]} -eq 0 ] && lfs_me_error "Non zero exit status." false
+		else
+			true
+			lfs_me_install || lfs_me_error "Non zero exit status." false
+		fi
+        
+	    lfs_me_message "Packaging"
+		if $debug; then lfs_me_pause; fi
+        lfs_me_package
+        ;;
+
+	download)
+        cp "$pkgbuild_file" "${temp_dir}/PKGBUILD"
+		lfs_me_load_pkgbuild
+
+        lfs_me_message "Getting sources"
+        lfs_me_sources
+        ;;
+
+	indexadd)
+        lfs_me_indexadd
+        ;;
+
+	indexremove)
+        lfs_me_indexremove
+        ;;
+
+	indexlist)
+		lfs_me_get_installed_packages
+		cat "${temp_dir}/ALL_PACKAGES" | sed 's!/! !g' | grep -i "$indexlist_search"
+        ;;
+
+	list)
+		cat "$temp_dir"/{FILES,DIRS,LINKS} | grep -v '^$'
+		;;
+
+	install)
+		lfs_me_message "Checking dependencies"
+		lfs_me_check_dependencies false
+
+		lfs_me_message "Checking for conflicting files"
+		lfs_me_check_conflicts
+
+		lfs_me_message "Running preinstall"
+		if [[ "$debug" == "true" ]]; then lfs_me_pause; fi
+		if [[ "$do_logs" == "true" ]]
+		then
+			lfs_me_preinstall 2>&1 | tee "${log_dir}/last-preinstall.log"
+			[ ! ${PIPESTATUS[0]} -eq 0 ] && lfs_me_error "Non zero exit status." false
+		else
+			true
+			lfs_me_preinstall || lfs_me_error "Non zero exit status." false
+		fi
+
+		if [[ ! -z "$backup" ]]
+		then
+			lfs_me_message "Backing up config files"
+			lfs_me_backup
+		fi
+
+		#install the package
+		lfs_me_install_package "$package_file"
+		
+		#postinstall script
+		lfs_me_message "Running postinstall"
+		cd "$temp_dir"
+		if [[ "$debug" == "true" ]]; then lfs_me_pause; fi
+		if [[ "$do_logs" == "true" ]]
+		then
+			lfs_me_postinstall 2>&1 | tee "${log_dir}/last-postinstall.log"
+		else
+			lfs_me_postinstall
+		fi
+
+        #add to index
+        lfs_me_indexadd
+        ;;
+
+	remove)
+		lfs_me_message "Running preremove"
+		if [[ "$debug" == "true" ]]; then lfs_me_pause; fi
+		if [[ "$do_logs" == "true" ]]
+		then
+			lfs_me_preremove 2>&1 | tee "${log_dir}/last-preremove.log"
+			[ ! ${PIPESTATUS[0]} -eq 0 ] && lfs_me_error "Non zero exit status." false
+		else
+			lfs_me_preremove || lfs_me_error "Non zero exit status." false
+		fi
+
+		if [[ ! -z "$backup" ]]
+		then
+			lfs_me_message "Backing up config files"
+			lfs_me_backup
+		fi
+
+		#actually removing the files
+		lfs_me_remove_package
+
+        #postremove script
+        lfs_me_message "Running postremove"
+		if [[ "$debug" == "true" ]]; then lfs_me_pause; fi
+		if [[ "$do_logs" == "true" ]]
+		then
+			lfs_me_postremove 2>&1 | tee "${log_dir}/last-postremove.log"
+		else
+			lfs_me_postremove
+		fi
+
+        #remove from index
+        lfs_me_indexremove
+        ;;
+	check)
+        lfs_me_message "Preparing sha1sums"
+		if [[ "$debug" == "true" ]]; then lfs_me_pause; fi
+
+	    cd "$temp_dir"
+	    grep -ve "[a-z0-9]\{40\}\\s*\\.\\/\(FILES$\|LINKS$\|DIRS$\)" sha1sums > sha1sums.grep
+	    mv sha1sums.grep sha1sums
+
+        #verify checksums
+        lfs_me_message "Verifying checksums"
+        cd "${install_prefix}/"
+		if [[ "$debug" == "true" ]]; then lfs_me_pause; fi
+		if [[ "$do_logs" == "true" ]]
+		then
+			sha1sum -c "$temp_dir/sha1sums" 2>&1 | tee "${log_dir}/last-checksums.log"
+		else
+			sha1sum -c "$temp_dir/sha1sums"
+		fi
+        ;;
+	checksums)
+        cp "$pkgbuild_file" "${temp_dir}/PKGBUILD"
+		lfs_me_load_pkgbuild
+
+        lfs_me_message "Creating SHA1 checksums"
+        lfs_me_checksums
+        ;;
+	owner)
+		lfs_me_get_installed_packages
+		for package in $(cat "${temp_dir}/ALL_PACKAGES")
+		do
+			lfs_me_index_versioncheck
+			for file in $(cat "${index_dir}/${package}/"{FILES,DIRS,LINKS})
+			do
+				[ "$(readlink -f "$file")" == "$filename" ] && echo "${package/\//-}"
+			done
+		done
+		;;
+    *)
+        lfs_me_error "No action specified!" true
+        ;;
+esac
+
+if [[ "$debug" == "true" ]]; then echo "You can find logfiles in '${log_dir}'!"; fi
+
+lfs_me_cleanup
+lfs_me_show_time
+exit 0

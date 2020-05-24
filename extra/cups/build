@@ -1,0 +1,24 @@
+#!/bin/sh -e
+
+sed -i 's:555:755:g;s:444:644:g' Makedefs.in
+sed -i '/stat.h/a #include <asm-generic/ioctls.h>' tools/ipptool.c 
+
+aclocal  -I config-scripts
+autoconf -I config-scripts
+
+CC=gcc CXX=g++ \
+./configure --libdir=/usr/lib            \
+            --with-rcdir=/tmp/cupsinit   \
+            --with-system-groups=lpadmin
+
+make
+make BUILDROOT="$1" install
+
+# Remove tmp file.
+rm -rf "$1/tmp/cupsinit"
+
+# Remove all info files.
+rm -rf "$1/usr/share/info"
+
+# Remove docs.
+rm -rf "$1/usr/share/doc"

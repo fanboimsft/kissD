@@ -1,0 +1,7 @@
+binutils
+bison make
+flex make
+zlib
+gmp
+mpfr
+mpc

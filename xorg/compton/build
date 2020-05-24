@@ -1,0 +1,9 @@
+#!/bin/sh -e
+
+mkdir build
+cd build
+
+meson -D build_docs=false -D b_ndebug=true -D prefix=/usr
+
+ninja
+DESTDIR="$1" ninja install

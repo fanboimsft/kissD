@@ -1,0 +1,27 @@
+pkgbuild_version=5
+pkgname=xz
+pkgver=5.2.5
+
+dependencies=(
+    	"!$pkgname"
+	'bash'
+)
+sources=(
+    "http://tukaani.org/${pkgname}/${pkgname}-${pkgver}.tar.xz"
+)
+sha1sums=(
+)
+
+lfs_me_prepare() {
+	tar -xf "${sources_dir}/${pkgname}-${pkgver}.tar.xz" -C "$build_dir"
+
+	cd "${build_dir}/${pkgname}-${pkgver}"
+
+	./configure --prefix=/tools
+}
+lfs_me_install(){
+	cd "$build_dir/$pkgname-$pkgver"
+	make DESTDIR=$fakeroot_dir install
+}
+
+# vim:set syntax=sh et:

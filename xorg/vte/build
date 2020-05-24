@@ -1,0 +1,11 @@
+#!/bin/sh -e
+
+./configure \
+    --prefix=/usr \
+    --sysconfdir=/etc \
+    --disable-static \
+    --disable-introspection \
+    --disable-vala
+
+make
+make DESTDIR="$1" install

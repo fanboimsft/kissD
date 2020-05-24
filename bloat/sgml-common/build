@@ -1,0 +1,25 @@
+#!/bin/sh -e
+
+# Remove old catalog before upgrade.
+install-catalog --remove /etc/sgml/sgml-ent.cat \
+    /usr/share/sgml/sgml-iso-entities-8879.1986/catalog &&
+
+install-catalog --remove /etc/sgml/sgml-docbook.cat \
+    /etc/sgml/sgml-ent.cat
+
+patch -Np1 -i sgml-common-0.6.3-manpage-1.patch
+
+autoreconf -fvi
+
+./configure \
+    --prefix=/usr \
+    --sysconfdir=/etc
+
+make
+make DESTDIR="$1" docdir=/usr/share/doc install
+
+# Remove all info files.
+rm -rf "$1/usr/share/info"
+
+# Remove docs.
+rm -rf "$1/usr/share/doc"

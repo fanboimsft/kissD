@@ -1,0 +1,35 @@
+pkgbuild_version=5
+pkgname=make
+pkgver=4.3
+
+_info_pages=(
+    'make.info-2'
+    'make.info-1'
+    'make.info'
+)
+
+dependencies=(
+    	"!$pkgname"
+	'glibc'
+	'bash'
+)
+sources=(
+    "http://ftp.gnu.org/gnu/${pkgname}/${pkgname}-${pkgver}.tar.gz"
+)
+sha1sums=(
+)
+
+lfs_me_prepare() {
+	tar -xf "${sources_dir}/${pkgname}-${pkgver}.tar.gz" -C "$build_dir"
+
+	cd "${build_dir}/${pkgname}-${pkgver}"
+	#glibc 2.27 fix
+	sed -i '211,217 d; 219,229 d; 232 d' glob/glob.c	
+	./configure --prefix=/tools --without-guile
+}
+
+lfs_me_install() {
+	cd "${build_dir}/${pkgname}-${pkgver}"
+    	make DESTDIR="$fakeroot_dir" install
+}
+# vim:set syntax=sh et:

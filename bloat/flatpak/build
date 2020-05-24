@@ -1,0 +1,18 @@
+#!/bin/sh -e
+
+./configure \
+    --prefix=/usr \
+    --sysconfdir=/etc \
+    --localstatedir=/var \
+    --sbindir=/usr/bin \
+    --libexecdir=/usr/lib \
+    --disable-static \
+    --disable-gtk-doc \
+    --disable-documentation
+
+sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool
+
+make
+make DESTDIR="$1" install
+
+install -Dm644 flatpak-bindir.sh "$1/etc/profile.d/flatpak-bindir.sh"

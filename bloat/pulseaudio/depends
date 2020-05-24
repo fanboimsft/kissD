@@ -1,0 +1,6 @@
+alsa-lib
+dbus
+glib
+libcap
+libsndfile
+xml-parser make

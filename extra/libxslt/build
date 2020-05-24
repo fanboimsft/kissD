@@ -1,0 +1,11 @@
+#!/bin/sh -e
+
+patch -p1 < CVE-2019-11068.patch
+
+sed -i s/3000/5000/ libxslt/transform.c doc/xsltproc.{1,xml}
+
+./configure \
+    --prefix=/usr
+
+make
+make DESTDIR="$1" install

@@ -1,0 +1,99 @@
+pkgbuild_version=5
+pkgname=glibc
+pkgver=2.31
+
+_info_pages=(
+    'libc.info'
+    'libc.info-1'
+    'libc.info-2'
+    'libc.info-3'
+    'libc.info-4'
+    'libc.info-5'
+    'libc.info-6'
+    'libc.info-7'
+    'libc.info-8'
+    'libc.info-9'
+    'libc.info-10'
+    'libc.info-11'
+    'libc.info-12'
+    'libc.info-13'
+    'libc.info-14'
+)
+
+dependencies=(
+   	"!$pkgname"
+	'binutils-pass1'
+	'gcc-pass1'
+	'linux-headers'
+)
+sources=(
+	"http://ftp.gnu.org/gnu/glibc/glibc-$pkgver.tar.xz"
+)
+sha1sums=(
+    
+)
+
+lfs_me_prepare() {
+
+	tar -xf "${sources_dir}/${pkgname}-${pkgver}.tar.xz" -C "$build_dir"
+	cd "${build_dir}/${pkgname}-${pkgver}"
+
+            mkdir -v "../${pkgname}-build"
+            cd "../${pkgname}-build"
+
+    [ ! -z $LFS ] && [ ! -z $LFS_TGT ] || lfs_me_error "LFS and LFS_TGT environment variables aren't set!" false
+
+    "../${pkgname}-${pkgver}/configure"                             \
+        --prefix=/tools                               \
+        --host=$LFS_TGT                               \
+        --build=$("../${pkgname}-${pkgver}/scripts/config.guess") \
+        --enable-kernel=3.2                        \
+        --with-headers=/tools/include
+}
+
+lfs_me_build() {
+    cd "${build_dir}/${pkgname}-build"
+    make
+}
+
+lfs_me_check() {
+    return
+}
+
+lfs_me_install() {
+    cd "${build_dir}/${pkgname}-build"
+    make DESTDIR="$fakeroot_dir" install
+}
+
+lfs_me_preinstall() {
+    [ ! -z $LFS_TGT ] || lfs_me_error "The LFS_TGT environment variable isn't set!" false
+}
+
+lfs_me_postinstall() {
+    cd "$build_dir"
+    echo 'main(){}' > dummy.c
+    $LFS_TGT-gcc dummy.c
+    case $(uname -m) in
+        x86_64)
+            readelf -l a.out | grep -E ': /tools/lib(|64)/ld-linux-x86-64.so.2' || lfs_me_error "Wrong dynamic loader" false
+            ;;
+        *)
+            readelf -l a.out | grep -E ': /tools/lib/ld-linux.so.2' || lfs_me_error "Wrong dynamic loader" false
+            ;;
+    esac
+
+    echo "Adding info pages"
+    for info_page in ${_info_pages[@]}
+    do
+        install-info "/tools/share/info/${info_page}" /tools/share/info/dir
+    done
+}
+
+lfs_me_preremove() {
+    echo "Removing info pages"
+    for info_page in ${_info_pages[@]}
+    do
+        install-info --delete "/tools/share/info/${info_page}" /tools/share/info/dir
+    done
+}
+# vim:set syntax=sh et:

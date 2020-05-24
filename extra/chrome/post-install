@@ -1,0 +1,5 @@
+#!/bin/sh -e
+
+# Delete source file to ensure proper updates
+
+rm -f /var/cache/kiss/sources/chrome/*

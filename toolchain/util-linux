@@ -1,0 +1,43 @@
+pkgbuild_version=5
+pkgname=util-linux
+pkgver=2.35.1
+
+dependencies=(
+    "!$pkgname"
+    'coreutils'
+)
+sources=(
+    "https://cdn.kernel.org/pub/linux/utils/${pkgname}/v${pkgver:0:4}/${pkgname}-${pkgver}.tar.xz"
+)
+sha1sums=(
+)
+
+overwrite=(
+"/tools/bin/kill"
+"/tools/share/man/man1/kill.1"
+)
+lfs_me_prepare() {
+	tar -xf "${sources_dir}/${pkgname}-${pkgver}.tar.xz" -C "$build_dir"
+
+	cd "${build_dir}/${pkgname}-${pkgver}"
+
+    ./configure                        \
+        --prefix=/tools                \
+        --without-python               \
+        --disable-makeinstall-chown    \
+        --without-systemdsystemunitdir \
+        --without-ncurses \
+        PKG_CONFIG=""
+}
+
+lfs_me_install() {
+	cd "${build_dir}/${pkgname}-${pkgver}"
+	make DESTDIR="$fakeroot_dir" install
+
+}
+
+lfs_me_check() {
+    return
+}
+
+# vim:set syntax=sh et:

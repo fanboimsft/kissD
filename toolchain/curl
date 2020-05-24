@@ -1,0 +1,48 @@
+pkgbuild_version=5
+pkgname=curl
+pkgver=7.70.0
+
+dependencies=(
+    "!$pkgname"
+    'libressl'
+    'zlib'
+)
+sources=(
+    "https://curl.haxx.se/download/${pkgname}-${pkgver}.tar.xz"
+)
+sha1sums=(
+)
+
+lfs_me_prepare() {
+	tar -xf "${sources_dir}/${pkgname}-${pkgver}.tar.xz" -C "$build_dir"
+
+	cd "${build_dir}/${pkgname}-${pkgver}"
+./configure \
+    --prefix=/tools \
+    --enable-ipv6 \
+    --enable-unix-sockets \
+    --enable-hidden-symbols \
+    --without-libidn \
+    --without-libidn2 \
+    --disable-manual \
+    --disable-ldap \
+    --disable-ares \
+    --without-librtmp \
+    --without-icu \
+    --without-libpsl \
+    --with-pic \
+    --with-ca-fallback
+
+}
+
+lfs_me_build() {
+	cd "${build_dir}/${pkgname}-${pkgver}"
+	make
+}
+
+lfs_me_install() {
+	cd "${build_dir}/${pkgname}-${pkgver}"
+	make DESTDIR=${fakeroot_dir} install
+}
+
+# vim:set syntax=sh et:

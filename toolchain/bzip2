@@ -1,0 +1,31 @@
+pkgbuild_version=5
+pkgname=bzip2
+pkgver=1.0.8
+
+dependencies=(
+    "!$pkgname"
+    'glibc'
+)
+sources=(
+    "https://www.sourceware.org/pub/${pkgname}/${pkgname}-${pkgver}.tar.gz"
+)
+sha1sums=(
+    3f89f861209ce81a6bab1fd1998c0ef311712002
+)
+
+lfs_me_prepare() {
+	tar -xf "${sources_dir}/${pkgname}-${pkgver}.tar.gz" -C "$build_dir"
+
+	cd "${build_dir}/${pkgname}-${pkgver}"
+}
+
+lfs_me_check() {
+    return
+}
+
+lfs_me_install() {
+	cd "${build_dir}/${pkgname}-${pkgver}"
+	make PREFIX="${fakeroot_dir}/tools" install
+}
+
+# vim:set syntax=sh et:

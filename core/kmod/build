@@ -1,0 +1,23 @@
+#!/bin/sh -e
+
+./configure --prefix=/usr  \
+    --bindir=/bin          \
+    --sysconfdir=/etc      \
+    --with-rootlibdir=/lib \
+    --with-xz              \
+    --with-zlib
+
+make
+make DESTDIR="$1" install
+
+for target in depmod insmod lsmod modinfo modprobe rmmod; do
+  ln -sfv ../bin/kmod "$1/bin/$target"
+done
+
+ln -sfv kmod "$1/bin/lsmod"
+
+# Remove all info files.
+rm -rf "$1/usr/share/info"
+
+# Remove docs.
+rm -rf "$1/usr/share/doc"

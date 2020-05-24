@@ -1,0 +1,20 @@
+#!/bin/sh -e
+
+# Remove deprecated entries.
+sed -i -r 's:"(/system):"/org/gnome\1:g' schemas/*.in
+
+mkdir build
+cd build
+
+meson \
+    --prefix=/usr \
+    ..
+
+ninja
+DESTDIR="$1" ninja install
+
+# Remove all info files.
+rm -rf "$1/usr/share/info"
+
+# Remove docs.
+rm -rf "$1/usr/share/doc"

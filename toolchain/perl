@@ -1,0 +1,34 @@
+pkgbuild_version=5
+pkgname=perl
+pkgver=5.30.2
+
+dependencies=(
+    "!$pkgname"
+	'glibc'
+)
+sources=(
+    "http://www.cpan.org/src/5.0/${pkgname}-${pkgver}.tar.xz"
+)
+sha1sums=(
+)
+
+lfs_me_prepare() {
+	tar -xf "${sources_dir}/${pkgname}-${pkgver}.tar.xz" -C "$build_dir"
+	cd "${build_dir}/${pkgname}-${pkgver}"
+
+	sh Configure -des -Dprefix=/tools -Dlibs=-lm -Uloclibpth -Ulocincpth
+}
+
+lfs_me_check() {
+    return
+}
+
+lfs_me_install() {
+	cd "${build_dir}/${pkgname}-${pkgver}"
+   	mkdir -pv "${fakeroot_dir}/tools/bin"
+    	cp -v perl cpan/podlators/pod2man "${fakeroot_dir}/tools/bin"
+    	mkdir -pv "${fakeroot_dir}/tools/lib/${pkgname}${pkgver:0:1}/${pkgver}"
+    	cp -Rv lib/* "${fakeroot_dir}/tools/lib/${pkgname}${pkgver:0:1}/${pkgver}"
+}
+
+# vim:set syntax=sh et:

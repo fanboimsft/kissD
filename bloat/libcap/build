@@ -1,0 +1,6 @@
+#!/bin/sh -e
+
+make -C pam_cap
+
+install -v -m755 pam_cap/pam_cap.so "$1/lib/security"
+install -v -m644 pam_cap/capability.conf "$1/etc/security"

@@ -1,0 +1,17 @@
+#!/bin/sh -e
+
+#gcc 10 fix
+sed -r -i '/^char.*parseopt_program_(doc|args)/d' src/parseopt.c
+
+./configure --prefix=/usr \
+    --disable-static \
+    --enable-libgdbm-compat
+
+make
+make DESTDIR="$1" install
+
+# Remove all info files.
+rm -rf "$1/usr/share/info"
+
+# Remove docs.
+rm -rf "$1/usr/share/doc"

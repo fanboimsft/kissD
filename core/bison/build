@@ -1,0 +1,10 @@
+#!/bin/sh -e
+
+#fix current version
+sed -i '6855 s/mv/cp/' Makefile.in
+
+./configure \
+    --prefix=/usr
+
+make
+make DESTDIR="$1" install

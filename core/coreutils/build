@@ -1,0 +1,20 @@
+#!/bin/sh -e
+
+# Fix a test.
+sed -i '/test.lock/s/^/#/' gnulib-tests/gnulib.mk
+
+autoreconf -fvi
+
+FORCE_UNSAFE_CONFIGURE=1 ./configure \
+    --prefix=/usr            \
+    --enable-no-install-program=kill,uptime
+
+make
+make DESTDIR="$1" install
+
+# Remove all info files.
+rm -rf "$1/usr/share/info"
+
+# Remove docs.
+rm -rf "$1/usr/share/doc"
+

@@ -1,0 +1,14 @@
+#!/bin/sh -e
+
+PAGE=A4 ./configure \
+    --prefix=/usr
+
+make -j1
+make DESTDIR="$1" install
+
+# Remove all info files.
+rm -rf "$1/usr/share/info"
+
+# Remove docs.
+rm -rf "$1/usr/share/doc"
+

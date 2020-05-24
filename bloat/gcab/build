@@ -1,0 +1,18 @@
+#!/bin/sh -e
+
+mkdir build
+cd build
+
+meson \
+    -Dprefix=/usr \
+    -Ddocs=false \
+    ..
+    
+ninja
+DESTDIR="$1" ninja install
+
+# Remove all info files.
+rm -rf "$1/usr/share/info"
+
+# Remove docs.
+rm -rf "$1/usr/share/doc"

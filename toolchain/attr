@@ -1,0 +1,45 @@
+pkgbuild_version=5
+pkgname=attr
+pkgver=2.4.48
+
+dependencies=(
+    	"!$pkgname"
+	'glibc'
+)
+sources=(
+	"http://download.savannah.gnu.org/releases/${pkgname}/${pkgname}-${pkgver}.tar.gz"
+)
+overwrite=(
+/usr/share/man/man5/attr.5
+)
+
+sha1sums=(
+)
+
+lfs_me_prepare() {
+	tar -xf "${sources_dir}/${pkgname}-${pkgver}.tar.gz" -C "$build_dir"
+
+	cd "${build_dir}/${pkgname}-${pkgver}"
+
+	#documentation in versioned directory
+	sed -i -e 's|/@pkg_name@|&-@pkg_version@|' include/builddefs.in
+
+	#don't install man-pages that are already provided by the package man-pages
+	sed -i -e "/SUBDIRS/s|man2||" man/Makefile
+
+	./configure --prefix=/tools \
+	--disable-static
+}
+
+lfs_me_check() {
+	cd "${build_dir}/${pkgname}-${pkgver}"
+	make -j1 tests root-tests
+}
+
+lfs_me_install() {
+	cd "${build_dir}/${pkgname}-${pkgver}"
+	make DESTDIR="$fakeroot_dir" install install-dev install-lib
+	chmod -v 755 "${fakeroot_dir}/tools/lib/libattr.so"
+}
+
+# vim:set syntax=sh et:

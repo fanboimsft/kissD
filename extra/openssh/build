@@ -1,0 +1,31 @@
+#!/bin/sh -e
+
+./configure \
+    --prefix=/usr \
+    --datadir=/usr/share/openssh \
+    --sysconfdir=/etc/ssh \
+    --without-selinux \
+    --with-privsep-user=nobody \
+    --with-mantype=doc \
+    --without-rpath \
+    --disable-strip \
+    --with-ssl-engine \
+    --with-pid-dir=/run \
+    --disable-wtmp \
+    --disable-utmp
+
+make
+make DESTDIR="$1" install
+
+install  -v -m700 -d "$1/var/lib/sshd"
+chown    -v root:sys "$1/var/lib/sshd"
+
+
+install -m 755 contrib/ssh-copy-id "$1/usr/bin/ssh-copy-id"
+install -m 644 contrib/ssh-copy-id.1 "$1/usr/share/man/man8/ssh-copy-id.1"
+
+mkdir -pv "$1/usr/lib/systemd/system/" 
+
+install -m 644 sshd.service "$1/usr/lib/systemd/system/"
+install -m 644 sshd.socket "$1/usr/lib/systemd/system/"
+

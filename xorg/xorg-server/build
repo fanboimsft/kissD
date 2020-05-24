@@ -1,0 +1,23 @@
+#!/bin/sh -e
+
+./configure \
+    --prefix=/usr \
+    --disable-xwayland \
+    --disable-unit-tests \
+    --enable-glx \
+    --enable-dri \
+    --enable-dri2 \
+    --enable-dri3 \
+    --enable-glamor \
+    --enable-xorg \
+    --enable-config-udev \
+    --enable-config-udev-kms \
+    --with-sha1=libcrypto
+
+make
+make DESTDIR="$1" install
+
+rm -f "$1/usr/share/X11/xorg.conf.d/10-evdev.conf"
+
+# Set suid for xorg.
+chmod u+s "$1/usr/bin/Xorg"

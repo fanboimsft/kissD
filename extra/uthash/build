@@ -1,0 +1,9 @@
+#!/bin/sh -e
+
+install -dm755 "$1/usr/include/"
+
+cd src
+for h in *.h; do
+      install -m 644 ${h} $1/usr/include/
+  done
+

@@ -1,0 +1,16 @@
+#!/bin/sh -e
+
+make CC="${CC:-cc} $CFLAGS -fPIC $LDFLAGS" -f Makefile-libbz2_so
+make CC="${CC:-cc} $CFLAGS -fPIC $LDFLAGS" bzip2recover libbz2.a
+make PREFIX="$1/usr" install
+
+# Fix nonsensical man page handling.
+mkdir -p "$1/usr/share"
+mv    -f "$1/usr/man" "$1/usr/share/man"
+
+# Install the shared library.
+install -Dm755 libbz2.so.1.0.8 "$1/usr/lib/libbz2.so.1.0.8"
+
+for lib in libbz2.so libbz2.so.1 libbz2.so.1.0; do
+    ln -sf libbz2.so.1.0.8 "$1/usr/lib/$lib"
+done

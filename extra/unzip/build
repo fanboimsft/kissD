@@ -1,0 +1,23 @@
+#!/bin/sh -e
+
+patch -i unzip-patch1
+patch -Np1 -i unzip-patch2
+patch -Np1 -i unzip-patch3
+patch -Np1 -i unzip-patch4
+patch  -i unzip-patch5
+patch -Np1 -i unzip-patch6
+patch -Np1 -i unzip-patch7
+patch  -i unzip-patch8
+
+case `uname -m` in
+          i?86)
+                sed -i -e 's/DASM_CRC"/DASM_CRC -DNO_LCHMOD"/' unix/Makefile
+                make -f unix/Makefile linux
+                ;;
+        *)
+                sed -i -e 's/CFLAGS="-O -Wall/& -DNO_LCHMOD/' unix/Makefile
+                make -f unix/Makefile linux_noasm
+                ;;
+        esac
+
+make prefix="$1/usr" MANDIR="$1/usr/share/man/man1" install

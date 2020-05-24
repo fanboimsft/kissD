@@ -1,0 +1,23 @@
+pkgbuild_version=5
+pkgname=file
+pkgver=5.38
+
+dependencies=(
+    "!$pkgname"
+    'glibc'
+)
+sources=(
+    "ftp://ftp.astron.com/pub/${pkgname}/${pkgname}-${pkgver}.tar.gz"
+)
+sha1sums=(
+)
+
+lfs_me_prepare() {
+	tar -xf "${sources_dir}/${pkgname}-${pkgver}.tar.gz" -C "$build_dir"
+
+	cd "${build_dir}/${pkgname}-${pkgver}"
+	./configure --prefix=/tools \
+	--disable-shared
+}
+
+# vim:set syntax=sh et:

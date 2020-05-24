@@ -1,0 +1,44 @@
+pkgbuild_version=5
+pkgname=expect
+pkgver=5.45.4
+
+dependencies=(
+    "!$pkgname"
+	'tcl'
+)
+sources=(
+    "http://prdownloads.sourceforge.net/${pkgname}/${pkgname}${pkgver}.tar.gz"
+)
+sha1sums=(
+)
+
+lfs_me_prepare() {
+	tar -xf "${sources_dir}/${pkgname}${pkgver}.tar.gz" -C "$build_dir"
+
+	cd "${build_dir}/${pkgname}${pkgver}"
+
+    cp -v configure{,.orig}
+    sed 's:/usr/local/bin:/bin:' configure.orig > configure
+
+    ./configure                       \
+        --prefix=/tools               \
+        --with-tcl=/tools/lib         \
+        --with-tclinclude=/tools/include
+}
+
+lfs_me_build() {
+	cd "${build_dir}/${pkgname}${pkgver}"
+    make
+}
+
+lfs_me_check() {
+	cd "${build_dir}/${pkgname}${pkgver}"
+	make test
+}
+
+lfs_me_install() {
+	cd "${build_dir}/${pkgname}${pkgver}"
+	make DESTDIR="$fakeroot_dir" SCRIPTS="" install
+}
+
+# vim:set syntax=sh et:

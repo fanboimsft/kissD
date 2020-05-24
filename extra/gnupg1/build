@@ -1,0 +1,13 @@
+#!/bin/sh -e
+
+# Fix build fail with GCC 10.
+export CFLAGS="$CFLAGS -fcommon"
+
+./configure \
+    --prefix=/usr \
+    --sysconfdir=/etc \
+    --disable-nls \
+    --enable-noexecstack
+
+make
+make DESTDIR="$1" install

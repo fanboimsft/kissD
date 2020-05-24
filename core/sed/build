@@ -1,0 +1,18 @@
+#!/bin/sh -e
+
+sed -i 's/usr/tools/'                 build-aux/help2man
+sed -i 's/testsuite.panic-tests.sh//' Makefile.in
+
+./configure \
+    --prefix=/usr \
+    --bindir=/bin
+
+make
+make DESTDIR="$1" install
+
+# Remove all info files.
+rm -rf "$1/usr/share/info"
+
+# Remove docs.
+rm -rf "$1/usr/share/doc"
+

@@ -1,0 +1,4 @@
+linux-pam
+gnu-efi
+shadow
+cryptsetup
