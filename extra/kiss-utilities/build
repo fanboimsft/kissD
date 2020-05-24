@@ -1,0 +1,2 @@
+mkdir -pv $1/usr/bin/
+cp -a contrib/* $1/usr/bin
