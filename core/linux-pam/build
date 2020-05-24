@@ -14,6 +14,7 @@ chmod -v 4755 "$1/sbin/unix_chkpwd"
 
 install -v -m755 -d "$1/etc/pam.d"
 
+install -v -m644 system-account "$1/etc/pam.d/system-account"
 install -v -m644 system-auth "$1/etc/pam.d/system-auth"
 install -v -m644 system-session "$1/etc/pam.d/system-session"
 install -v -m644 system-password "$1/etc/pam.d/system-password"
