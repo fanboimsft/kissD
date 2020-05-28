@@ -60,7 +60,6 @@ export MOZ_NOSPAM=1
     --disable-elf-hack \
     --disable-gold \
     --disable-jemalloc \
-    --disable-pulseaudio \
     --disable-startup-notification \
     --disable-crashreporter \
     --disable-updater \

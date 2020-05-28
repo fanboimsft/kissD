@@ -1,0 +1,7 @@
+qt5
+qt5-svg
+qt5-tools make
+argon2
+libgcrypt
+libsodium
+libqrencode

@@ -1,12 +1,5 @@
-gcab make
-gdk-pixbuf make
-glib make
-gobject-introspection make
-gtk+3 make
-json-glib make
-libarchive make
-libsoup make
-pango make
-yaml make
-
-
+cmake
+glib
+gperf
+libarchive
+libsoup
