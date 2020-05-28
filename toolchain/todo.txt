@@ -1,3 +1,0 @@
-* Paketkonflikte in den Griff bekommen (Infopages!)
-* Flag f√r build-toolchain, mit dem man nach jedem Paket anhalten kann.
-* Loggin f√r build-toolchain
