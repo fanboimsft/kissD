@@ -43,6 +43,7 @@ nodejs        make
 pango
 perl          make
 pixman
+pulseaudio
 python        make
 python2       make
 rust          make

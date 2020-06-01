@@ -1,0 +1,5 @@
+#!/bin/sh -e
+
+make -f makefile
+
+install -Dm755 unrar "$1/usr/bin/unrar"

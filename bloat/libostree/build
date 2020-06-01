@@ -7,16 +7,8 @@
     --sbindir=/usr/bin \
     --libexecdir=/usr/lib \
     --disable-static \
-    --disable-gtk-doc
+    --disable-gtk-doc \
+    --disable-man
 
 make
 make DESTDIR="$1" install
-
-# Remove useless files.
-rm -rf "$1/etc"
-
-# Remove all info files.
-rm -rf "$1/usr/share/info"
-
-# Remove docs.
-rm -rf "$1/usr/share/doc"

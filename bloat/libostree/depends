@@ -1,9 +1,1 @@
-e2fsprogs make
 fuse2 make
-glib make
-gpgme make
-libarchive make
-libsoup make
-libxslt make
-docbook-xml make
-docbook-xsl-nons nake

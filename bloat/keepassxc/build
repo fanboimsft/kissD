@@ -1,0 +1,16 @@
+#!/bin/sh -e
+
+export DESTDIR="$1"
+
+cmake -B build \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_INSTALL_LIBDIR=lib \
+    -DWITH_XC_UPDATECHECK=OFF \
+    -DWITH_GUI_TESTS=OFF \
+    -DWITH_TESTS=OFF
+
+
+cmake --build   build
+cmake --install build
+

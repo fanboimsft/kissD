@@ -1,0 +1,19 @@
+#!/bin/sh -e
+
+sed -i 's:sysconfig/i18n:profile.d/i18n.sh:g' data/lxdm.in &&
+sed -i 's:/etc/xprofile:/etc/profile:g' data/Xsession &&
+sed -e 's/^bg/#&/'        \
+    -e '/reset=1/ s/# //' \
+    -e 's/logou$/logout/' \
+    -e "/arg=/a arg=$XORG_PREFIX/bin/X" \
+    -i data/lxdm.conf.in
+
+./configure --prefix=/usr     \
+            --sysconfdir=/etc \
+            --with-pam        \
+            --with-systemdsystemunitdir=/lib/systemd/system
+
+make
+make DESTDIR="$1" install
+
+install -Dm0644 lxdm "$1/etc/pam.d/lxdm"
