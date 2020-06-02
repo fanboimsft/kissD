@@ -1,5 +1,7 @@
 #!/bin/sh -e
 
+patch -Np1 -i glibc.patch
+
 # Build and install regular busybox.
 # This excludes utilities which require 'suid' to function.
 make

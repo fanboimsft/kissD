@@ -4,3 +4,4 @@ files/.config-suid
 files/acpid.run
 files/crond.run
 files/syslogd.run
+patches/glibc.patch
