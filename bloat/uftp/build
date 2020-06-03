@@ -1,7 +1,0 @@
-#!/bin/sh -e
-
-make
-install -Dm 755 build/uFTP "$1/usr/bin/uftp"
-install -Dm 600 uftpd.cfg "$1/etc/uftpd.cfg"
-install -Dm 600 cert.pem "$1/etc/uFTP/cert.pem"
-install -Dm 600 key.pem "$1/etc/uFTP/key.pem"
