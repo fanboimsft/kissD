@@ -1,0 +1,4 @@
+#!/bin/sh -e
+
+mkdir -p "$1/usr/share/alsa"
+cp -a * "$1/usr/share/alsa/"
