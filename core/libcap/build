@@ -5,7 +5,7 @@ sed -i '/install.*STALIBNAME/d' libcap/Makefile
 make
 make DESTDIR="$1" RAISE_SETFCAP=no lib=lib prefix=/usr install
 
-chmod -v 755 "$1/usr/lib/libcap.so.2.34"
+chmod -v 755 "$1/usr/lib/libcap.so.2.36"
 
 # Remove all info files.
 rm -rf "$1/usr/share/info"
