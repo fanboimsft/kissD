@@ -1,0 +1,10 @@
+#!/bin/sh -e
+
+patch -Np1 -i silence-dlerror.patch
+
+./configure --prefix=/usr \
+    --disable-static
+
+make
+make DESTDIR="$1" install
+
