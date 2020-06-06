@@ -23,7 +23,3 @@ localedef -i ru_RU -f KOI8-R ru_RU.KOI8-R
 localedef -i ru_RU -f UTF-8 ru_RU.UTF-8
 localedef -i tr_TR -f UTF-8 tr_TR.UTF-8
 localedef -i zh_CN -f GB18030 zh_CN.GB18030
-
-# Symlinks required for gcc and g++
-ln -sv /tools/lib/libgcc_s.so{,.1} /usr/lib
-ln -sv /tools/lib/libstdc++.{a,so{,.6}} /usr/lib
