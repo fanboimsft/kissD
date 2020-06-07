@@ -1,7 +1,0 @@
-#!/bin/sh -e
-
-patch -Np0 -i overflow.patch
-./autogen.sh --prefix=/usr
-
-make
-make DESTDIR="$1" install
