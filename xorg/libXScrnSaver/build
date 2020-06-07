@@ -1,8 +1,0 @@
-#!/bin/sh -e
-
-./configure \
-    --prefix=/usr \
-    --enable-malloc0returnsnull
-
-make
-make DESTDIR="$1" install

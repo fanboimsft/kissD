@@ -1,0 +1,5 @@
+echo "check that nothing points to /tools in /usr/bin and /lib"
+echo "check that no scripts in /usr/bin link to /tools/ grep -Hrn /tools/"
+echo "kiss won't overwrite symlinks to /tools so remove and install package again if needed"
+echo "coreutils, gcc and others might need it"
+

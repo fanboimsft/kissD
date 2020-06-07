@@ -1,8 +1,0 @@
-libev
-xcb-util
-xcb-util-renderutil
-xcb-util-image
-uthash
-libconfig
-libxdg-basedir
-pcre

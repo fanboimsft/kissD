@@ -1,7 +1,0 @@
-libXScrnSaver
-libXcursor
-libXinerama
-libXrandr
-libXtst
-meson make
-xorg-server

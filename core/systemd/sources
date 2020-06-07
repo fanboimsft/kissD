@@ -1,3 +1,4 @@
+http://www.linuxfromscratch.org/patches/blfs/svn/systemd-245-gcc_10-fixes-1.patch
 https://github.com/systemd/systemd/archive/v245/systemd-245.tar.gz
 files/system-session
 files/systemd-user

@@ -1,0 +1,5 @@
+#!/bin/sh -e
+
+mkdir -pv "$1/usr/bin"
+cp -v contrib/* "$1/usr/bin/"
+

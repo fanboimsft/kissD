@@ -1,4 +1,0 @@
-libX11
-libXrandr
-xorg-util-macros make
-xorgproto        make

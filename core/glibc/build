@@ -6,7 +6,13 @@ ln -sfv ../lib/ld-linux-x86-64.so.2 /lib64/ld-lsb-x86-64.so.3
 mkdir -v gcc-build
 cd gcc-build
 
-    ../configure \
+echo "slibdir=/usr/lib" >> configparms
+echo "rtlddir=/usr/lib" >> configparms
+echo "sbindir=/usr/bin" >> configparms
+echo "rootsbindir=/usr/bin" >> configparms
+
+CC="gcc -ffile-prefix-map=/tools/=/usr" \
+"../configure"	\
     --prefix=/usr \
     --disable-werror \
     --enable-kernel=3.2 \
@@ -19,9 +25,7 @@ cd gcc-build
 make
 make DESTDIR="$1" install
 
-# Remove all info files.
-rm -rf "$1/usr/share/info"
-
+rm -rf "$"/usr/share/info/dir
 cd ..
 
 mkdir -pv "$1"/etc
@@ -32,6 +36,3 @@ cp -v ld.so.conf "$1"/etc/ld.so.conf
 	
 install -v -Dm644 nscd/nscd.tmpfiles "$1"/usr/lib/tmpfiles.d/nscd.conf
 install -v -Dm644 nscd/nscd.service "$1"/lib/systemd/system/nscd.service
-
-# Remove all info files.
-rm -rf "$/usr/share/info"

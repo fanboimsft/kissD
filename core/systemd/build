@@ -1,5 +1,8 @@
 #!/bin/sh -e
 
+#gcc 10 patch
+patch -Np1 -i systemd-245-gcc_10-fixes-1.patch
+
 sed -i 's/GROUP="render", //' rules.d/50-udev-default.rules.in
 
 mkdir -p build

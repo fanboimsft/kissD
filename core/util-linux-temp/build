@@ -1,0 +1,26 @@
+#!/bin/sh -e
+
+# Remove symlinks to /tools from bootstrap
+rm -vf /usr/include/{blkid,libmount,uuid}
+rm -vf /usr/lib/lib{blkid,fdisk,mount,uuid}.so*
+rm -vf /usr/lib/pkgconfig/{blkid,fdisk,mount,uuid}.pc
+
+./configure \
+    --disable-chfn-chsh  \
+    --disable-login      \
+    --disable-nologin    \
+    --disable-su         \
+    --disable-setpriv    \
+    --disable-runuser    \
+    --disable-pylibmount \
+    --disable-static     \
+    --without-python
+
+make
+make DESTDIR="$1" install
+
+# Remove all info files.
+rm -rf "$1/usr/share/info"
+
+# Remove docs.
+rm -rf "$1/usr/share/doc"

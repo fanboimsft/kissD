@@ -1,0 +1,3 @@
+https://github.com/systemd/systemd/archive/v245/systemd-245.tar.gz
+files/systemd-man-pages-245.tar.xz
+http://www.linuxfromscratch.org/patches/lfs/development/systemd-245-gcc_10-fixes-1.patch
