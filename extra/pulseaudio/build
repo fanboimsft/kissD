@@ -4,6 +4,7 @@
             --sysconfdir=/etc    \
             --localstatedir=/var \
             --disable-bluez5     \
+	    --enable-x11	 \
             --disable-rpath
 
 make
