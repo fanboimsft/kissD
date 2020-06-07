@@ -1,0 +1,54 @@
+alsa-lib
+atk
+bzip2
+cairo
+cbindgen      make
+dbus-glib
+expat
+ffmpeg
+fontconfig
+freetype-harfbuzz
+fribidi
+gdk-pixbuf
+glib
+gtk+2         make
+gtk+3
+libICE
+libSM
+libX11
+libXau
+libXcomposite
+libXcursor
+libXdamage
+libXext
+libXfixes
+libXi
+libXinerama
+libXrandr
+libXrender
+libXt
+libXxf86vm
+libdrm
+libepoxy
+libffi
+libjpeg-turbo
+libpng
+libvpx
+libxcb
+libxshmfence
+llvm          make
+mesa
+nasm          make
+nodejs        make
+pango
+perl          make
+pixman
+pulseaudio
+python        make
+python2       make
+rust          make
+which         make
+unzip         make
+yasm          make
+zip           make
+zlib
