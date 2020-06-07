@@ -3,4 +3,5 @@ dbus
 glib
 libcap
 libsndfile
+libXtst
 xml-parser make
