@@ -3,6 +3,7 @@ atk
 bzip2
 cairo
 cbindgen      make
+clang	      make
 dbus-glib
 expat
 ffmpeg
