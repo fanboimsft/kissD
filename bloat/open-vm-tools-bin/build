@@ -1,1 +1,0 @@
-tar xvf open-vm-tools-611.0.1-2-x86_64.pkg.tar.zst -C $1/
