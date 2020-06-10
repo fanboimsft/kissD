@@ -1,0 +1,2 @@
+https://github.com/plougher/squashfs-tools/archive/4.4.tar.gz
+patches/0001-squashfs-tools-fix-build-failure-against-gcc-10.patch

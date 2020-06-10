@@ -1,0 +1,16 @@
+#!/bin/sh -e
+
+cd squashfs-tools
+patch -Np2 -i ../0001-squashfs-tools-fix-build-failure-against-gcc-10.patch
+
+make \
+    GZIP_SUPPORT=1 \
+    XZ_SUPPORT=1 \
+    LZO_SUPPORT=0 \
+    LZMA_XZ_SUPPORT=1 \
+    LZ4_SUPPORT=0 \
+    ZSTD_SUPPORT=1 \
+    XATTR_SUPPORT=1
+
+make install INSTALL_DIR="$1"/usr/bin
+
