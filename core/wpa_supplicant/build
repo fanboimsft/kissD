@@ -17,4 +17,4 @@ install -v -m644 dbus/dbus-wpa_supplicant.conf \
                  "$1/etc/dbus-1/system.d/wpa_supplicant.conf"
 
 install -v -dm755 "$1/etc/wpa_supplicant"
-install -v -m644 wpa_supplicant-wifi0.conf "$1/etc/wpa_supplicant/pa_supplicant-wifi0.conf"
+install -v -m644 wpa_supplicant-wifi0.conf "$1/etc/wpa_supplicant/wpa_supplicant-wifi0.conf"
