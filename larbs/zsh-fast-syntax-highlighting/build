@@ -1,0 +1,4 @@
+#!/bin/sh -e
+
+install -dm0755 "$1/usr/share/zsh/plugins/fast-syntax-highlighting"
+cp -a ./* "$1/usr/share/zsh/plugins/fast-syntax-highlighting"

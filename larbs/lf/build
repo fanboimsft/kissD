@@ -1,0 +1,14 @@
+#!/bin/sh -e
+
+go mod vendor
+./gen/build.sh -mod=vendor -trimpath
+go clean -modcache
+
+install -Dm755 -t "$1/usr/bin" ./lf
+install -Dm644 -t "$1/usr/share/doc/lf" ./etc/lfrc.example
+install -Dm644 -t "$1/usr/share/lf" ./etc/lfcd.sh
+install -Dm644 -t "$1/usr/share/man/man1" ./lf.1
+
+# vim
+install -Dm644 -t "$1/usr/share/vim/vimfiles/syntax" ./etc/lf.vim
+install -Dm644 -t "$1/usr/share/vim/vimfiles/ftdetect" ./etc/lf.vim

@@ -1,0 +1,7 @@
+#!/bin/sh -e
+
+install -dm 0755 "$1/opt/thunderbird"
+install -dm 0755 "$1/usr/bin"
+cp -a * "$1/opt/thunderbird/"
+
+ln -s /opt/thunderbird/thunderbird "$1/usr/bin/thunderbird"

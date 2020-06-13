@@ -2,15 +2,8 @@
 
 # Install service file in bin.
 sed -i 's/sbin/bin/' make-linux.mk debian/zerotier-one.service
-echo $CFLAGS
-make
-#CFLAGS+= -fPIE CXXFLAGS+= -fPIE make
+
+CFLAGS+=" -fPIE" CXXFLAGS+=" -fPIE" make
 make DESTDIR="$1" install
 
 install -Dm644 debian/zerotier-one.service "$1/usr/lib/systemd/system/zerotier-one.service"
-
-# Remove all info files.
-rm -rf "$1/usr/share/info"
-
-# Remove docs.
-rm -rf "$1/usr/share/doc"

@@ -1,0 +1,8 @@
+libnotify
+libXinerama
+dbus
+libXrandr
+glib
+pango
+cairo
+gtk+3

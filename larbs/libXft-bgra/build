@@ -1,11 +1,11 @@
 #!/bin/sh -e
 
-git fetch "https://gitlab.freedesktop.org/mawww/libxft.git" "bgra-glyphs"
-git checkout -b "mawww/libxft-bgra-glyphs" FETCH_HEAD
+#fix autogen error
+rm -fv install.sh
 
-./autogen.sh
-./configure \
+./autogen.sh --sysconfdir=/etc \
     --prefix=/usr \
+    --mandir=/usr/share/man \
     --disable-static
 
 make

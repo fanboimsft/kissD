@@ -1,0 +1,6 @@
+#!/bin/sh -e
+
+make DESTDIR="$1" WITH_ALLCOMP=yes install
+
+cd contrib/dmenu
+install -Dm0755 passmenu "$1/usr/bin/passmenu"

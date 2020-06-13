@@ -1,0 +1,9 @@
+#!/bin/sh -e
+
+cd etc/linux-systemd
+
+mkdir -pv "$1/usr/lib/systemd/system"
+mkdir -pv "$1/usr/lib/systemd/user"
+
+cp -a system/* "$1/usr/lib/systemd/system"
+cp -a user/* "$1/usr/lib/systemd/user"
