@@ -1,0 +1,46 @@
+#!/bin/sh -e
+
+# Install python-pyparsing which is solely needed for
+# flatpak and thus contained in this build.
+{
+    cd pyparsing
+
+    python3 setup.py build
+    python3 setup.py install \
+        --prefix=/usr \
+        --root="$PWD/dist"
+
+    # Use a glob to avoid having to figure out the Python
+    # version for the path below.
+    cd dist/usr/lib/python*/site-packages
+
+    # Set the PYTHONPATH so python knows where to find mako.
+    # The one liner simply appends the existing path and
+    # handles the case where an unset PYTHONPATH breaks
+    # python as it will only contain our new addition.
+    PYTHONPATH=$PWD:$(python -c "import sys; print(':'.join(sys.path))")
+
+    cd -; cd ..
+}
+
+export PYTHONPATH
+
+./configure \
+    --prefix=/usr \
+    --sysconfdir=/etc \
+    --localstatedir=/var \
+    --sbindir=/usr/bin \
+    --libexecdir=/usr/lib \
+    --disable-static \
+    --disable-gtk-doc \
+    --disable-documentation \
+    --disable-seccomp \
+    --disable-nls \
+    --disable-system-helper
+
+sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool
+
+make
+make DESTDIR="$1" install
+
+install -Dm644 flatpak-bindir.sh "$1/etc/profile.d/flatpak-bindir.sh"
