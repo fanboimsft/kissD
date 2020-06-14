@@ -1,0 +1,17 @@
+#set a distribution to current directory
+
+for bin in ~/.cache/kiss/bin/*; do
+    binout=${bin##*/} binname=${bin%\#*} binout=${binname}.${binout#*\#}
+    ln -sf "$bin" "$binout"
+done
+
+kiss-bin-manifest | sort -rV > manifest
+
+httpd -f -p 8181
+
+
+#enable repo
+export KISS_BIN=http://x.x.x.x:8181:personal
+
+# This will fetch the manifest from the server
+kiss-bin fetch
