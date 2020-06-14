@@ -1,0 +1,13 @@
+#!/bin/sh -e
+
+# Fix install to honor DESTDIR
+sed -e 's|\$(man8dir)|$(DESTDIR)$(man8dir)|g' -e 's|cd \$(ROOTSBINDIR)|cd $(DESTDIR)$(ROOTSBINDIR)|g' -i Makefile.am
+
+mkdir -pv "$1/usr/share/man/man8"
+
+autoreconf -fvi
+./configure \
+    --prefix=/usr
+
+make
+make DESTDIR="$1" install

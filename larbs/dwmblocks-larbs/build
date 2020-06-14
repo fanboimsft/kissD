@@ -1,4 +1,6 @@
 #!/bin/sh -e
 
+mv -v config config.h
+
 make
 make DESTDIR="$1" install
