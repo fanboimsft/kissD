@@ -1,0 +1,11 @@
+#!/bin/sh -e
+
+ar x google-chrome-stable_83.0.4103.97-1_amd64.deb
+bsdtar -xf data.tar.xz -C "$1/"
+
+rm -r "$1"/etc/cron.daily/ 
+rm -r "$1"/opt/google/chrome/cron/
+rm "$1"/opt/google/chrome/product_logo_*.png
+
+#remove libwidevinecdm (segfaults on my system)
+rm -r "$1"/opt/google/chrome/WidevineCdm/

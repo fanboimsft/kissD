@@ -1,0 +1,3 @@
+git+https://github.com/streambinder/vpnc
+files/vpnc@.service
+files/vpnc-script
