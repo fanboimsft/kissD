@@ -1,4 +1,7 @@
 #!/bin/sh -e
 
+#use our own config
+cp config config.h
+
 make
 make DESTDIR="$1" install
