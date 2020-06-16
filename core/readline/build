@@ -1,5 +1,10 @@
 #!/bin/sh -e
 
+for patch in readline80-0??; do
+    patch -p0 < "$patch"
+done
+
+
 sed -i '/MV.*old/d' Makefile.in
 sed -i '/{OLDSUFF}/c:' support/shlib-install
 
