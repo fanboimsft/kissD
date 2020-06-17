@@ -1,0 +1,11 @@
+#!/bin/sh -e
+
+#use our own tarball from git repo, removed all references to docs to avoid gtk-doc dependancy
+tar xvf libldm-git.tar.xz
+cd libldm
+
+./autogen.sh
+./configure --prefix=/usr
+
+make
+make DESTDIR="$1" install
