@@ -1,0 +1,8 @@
+#!/bin/sh -e 
+
+cmake -B build \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DBUILD_SHARED_LIBS=ON
+
+make -C build
+make -C build DESTDIR="$1" install
