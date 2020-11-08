@@ -1,3 +1,5 @@
-https://github.com/kisslinux/kiss/archive/3.0.3.tar.gz
-https://github.com/kisslinux/website/archive/892e845e7b7757fc9570a1c97e359a53304bf51e.tar.gz docs
+https://github.com/kisslinux/kiss/archive/5.2.0.tar.gz
+https://github.com/kisslinux/website/archive/3460177c75be31c7c5dced2d7b065c05b6291abd.tar.gz docs
+https://github.com/kisslinux/wiki/archive/84efcf5e7551255004d632b3582e1fb0ea8236f5.tar.gz wiki
 files/kiss_path.sh
+files/flags.sh

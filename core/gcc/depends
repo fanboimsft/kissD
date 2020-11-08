@@ -1,6 +1,3 @@
 binutils
 flex make
 zlib
-gmp
-mpfr
-mpc

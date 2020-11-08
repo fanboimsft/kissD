@@ -22,9 +22,3 @@ install -v -m644 chage  "$1/etc/pam.d/chage"
 install -v -m644 login  "$1/etc/pam.d/login"
 install -v -m644 passwd  "$1/etc/pam.d/passwd"
 install -v -m644 su  "$1/etc/pam.d/su"
-
-# Remove all info files.
-rm -rf "$1/usr/share/info"
-
-# Remove docs.
-rm -rf "$1/usr/share/doc"

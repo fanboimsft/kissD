@@ -1,7 +1,7 @@
 #!/bin/sh -e
 
-ar x google-chrome-stable_83.0.4103.97-1_amd64.deb
-bsdtar -xf data.tar.xz -C "$1/"
+ar x google-chrome-stable_86.0.4240.183-1_amd64.deb
+tar -xf data.tar.xz -C "$1/"
 
 rm -r "$1"/etc/cron.daily/ 
 rm -r "$1"/opt/google/chrome/cron/

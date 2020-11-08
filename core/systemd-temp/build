@@ -1,16 +1,14 @@
 #!/bin/sh -e
 
-#gcc 10 fix
-patch -Np1 -i systemd-245-gcc_10-fixes-1.patch
 
 #Create a symlink to work around missing xsltproc
-ln -sf /tools/bin/true /usr/bin/xsltproc
+ln -sf /bin/true /usr/bin/xsltproc
 
 #Set up the man pages
 tar -xf systemd-man-pages-245.tar.xz
 
 #Remove tests that cannot be built in chroot
-sed '179,$ d' -i src/resolve/meson.build
+sed '177,$ d' -i src/resolve/meson.build
 
 #Remove an unneeded group, render, from the default udev rules
 sed -i 's/GROUP="render", //' rules.d/50-udev-default.rules.in
@@ -22,7 +20,6 @@ LANG=en_US.UTF-8                   \
 meson --prefix=/usr                \
       --sysconfdir=/etc            \
       --localstatedir=/var         \
-     -Dc_args=-Wno-format-overflow \
       -Dblkid=true                 \
       -Dbuildtype=release          \
       -Ddefault-dnssec=no          \
@@ -41,7 +38,7 @@ meson --prefix=/usr                \
       -Drpmmacrosdir=no            \
       -Dhomed=false                \
       -Duserdb=false               \
-      -Dman=true                   \
+      -Dman=false                  \
       ..
 
 LANG=en_US.UTF-8 ninja

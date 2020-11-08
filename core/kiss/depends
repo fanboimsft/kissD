@@ -1,1 +1,10 @@
+curl
+diffutils
+findutils
 git
+gnugrep
+gzip
+sed
+tar
+xz
+zstd

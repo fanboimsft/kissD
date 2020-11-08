@@ -1,6 +1,5 @@
 #!/bin/sh -e
 
-# Fix a test.
 sed -i '/test.lock/s/^/#/' gnulib-tests/gnulib.mk
 
 autoreconf -fvi

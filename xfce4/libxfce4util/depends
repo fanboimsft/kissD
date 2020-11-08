@@ -1,0 +1,4 @@
+gettext       make
+glib
+intltool-fake make
+libffi

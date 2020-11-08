@@ -1,14 +1,9 @@
 #!/bin/sh -e
 
-./configure \
-    --prefix=/usr \
-    --disable-static
+mkdir bld
+cd    bld
 
-make
-make DESTDIR="$1" install
+meson --prefix=/usr ..
+ninja
 
-# Remove all info files.
-rm -rf "$1/usr/share/info"
-
-# Remove docs.
-rm -rf "$1/usr/share/doc"
+DESTDIR=$1 ninja install

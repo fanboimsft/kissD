@@ -1,6 +1,4 @@
 #!/bin/sh -e
 
-patch -Np1 -i glibc.patch
-
 make
 make CONFIG_PREFIX="$1/usr" install

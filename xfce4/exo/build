@@ -1,0 +1,28 @@
+#!/bin/sh -e
+
+# Install perl-uri which is solely needed for exo
+# and thus contained in this build.
+{
+    cd uri
+
+    perl Makefile.PL
+
+    make
+    make PREFIX=/usr DESTDIR="$PWD/dist" install
+
+    export PERL5LIB="$PWD/dist/usr/lib/perl5/site_perl/5.32.0"
+
+    cd ..
+}
+
+./configure \
+    --prefix=/usr \
+    --localstatedir=/var \
+    --sysconfdir=/etc \
+    --mandir=/usr/share/man \
+    --disable-gtk-doc \
+    --disable-gtk2 \
+    --disable-nls
+
+make
+make DESTDIR="$1" install

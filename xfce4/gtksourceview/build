@@ -1,0 +1,12 @@
+#!/bin/sh -e
+
+./configure \
+    --prefix=/usr \
+    --localstatedir=/var \
+    --sysconfdir=/etc \
+    --disable-nls \
+    --disable-gtk-doc-html \
+    --disable-static
+
+make
+make DESTDIR="$1" install

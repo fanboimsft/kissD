@@ -1,0 +1,9 @@
+libmspack make
+libXinerama make
+libXi make
+libXtst make
+gdk-pixbuf make
+gtk+3 make
+gtkmm make
+libtirpc make
+rpcsvc-proto make

@@ -1,0 +1,4 @@
+#!/bin/sh -e
+
+chown -v root:messagebus "$1/usr/libexec/dbus-daemon-launch-helper"
+chmod -v      4750       "$1/usr/libexec/dbus-daemon-launch-helper"

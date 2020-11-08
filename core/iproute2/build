@@ -2,14 +2,15 @@
 
 sed -i /ARPD/d Makefile
 rm -fv man/man8/arpd.8
+
+# Disable iptables modules
 sed -i 's/.m_ipt.o//' tc/Makefile
 
+./configure \
+    --prefix=/usr
+
 make
-make DESTDIR="$1" install
+make DESTDIR="$1" SBINDIR="/usr/bin" install
 
-# Remove all info files.
-rm -rf "$1/usr/share/info"
-
-# Remove docs.
-rm -rf "$1/usr/share/doc"
-
+install -Dm0644 include/libnetlink.h "$1/usr/include/libnetlink.h"
+install -Dm0644 lib/libnetlink.a "$1/usr/lib/libnetlink.a"

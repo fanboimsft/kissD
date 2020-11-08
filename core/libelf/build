@@ -1,9 +1,0 @@
-#!/bin/sh -e
-
-./configure --prefix=/usr --disable-debuginfod
-
-make
-make prefix="$1/usr" -C libelf install
-
-install -vm644 config/libelf.pc "$1/usr/lib/pkgconfig"
-rm "$1/usr/lib/libelf.a"
