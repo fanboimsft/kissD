@@ -5,6 +5,6 @@ git
 gnugrep
 gzip
 sed
-tar
+gtar
 xz
 zstd
