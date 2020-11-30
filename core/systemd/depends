@@ -1,4 +1,3 @@
-cmake
 linux-pam
 gnu-efi
 gperf
