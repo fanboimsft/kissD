@@ -1,4 +1,5 @@
 linux-pam
 gnu-efi
+gperf
 meson
 shadow
