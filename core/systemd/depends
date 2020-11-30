@@ -2,4 +2,5 @@ linux-pam
 gnu-efi
 gperf
 meson
+pkgconf
 shadow
