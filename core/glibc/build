@@ -1,7 +1,7 @@
 #!/bin/sh -e
 
 #make compatibility symlink
-ln -sfv ../lib/ld-linux-x86-64.so.2 /lib64/ld-lsb-x86-64.so.3
+#ln -sfv ../lib/ld-linux-x86-64.so.2 /lib64/ld-lsb-x86-64.so.3
 	
 mkdir -v gcc-build
 cd gcc-build

@@ -1,4 +1,5 @@
-https://github.com/systemd/systemd/archive/v246.tar.gz
+https://github.com/systemd/systemd/archive/v247.tar.gz
 files/system-session
 files/systemd-user
 files/20-wired.network
+files/25-wireless.network

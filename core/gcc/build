@@ -12,15 +12,41 @@ sed -i 's/lib64/lib/' gcc/gcc/config/i386/linux64.h
 mkdir -p gcc-build
 cd gcc-build
 
-    ../gcc/configure \
+# Grab the system's GCC version.
+IFS=. read -r gcc_version _ 2>/dev/null \
+    < "/var/db/kiss/installed/gcc/version" || gcc_version=null
+
+# Skip the bootstrap process if we are able.
+case $2 in "$gcc_version"*)
+    printf '%s\n' "Minor version difference, disabling bootstrap."
+    bootstrap=--disable-bootstrap
+esac
+
+../gcc/configure \
     --prefix=/usr \
-    --disable-multilib \
-    --disable-werror \
-    --enable-checking=release \
+    --libexecdir=/usr/lib \
     --mandir=/usr/share/man \
     --infodir=/usr/share/info \
+    --disable-multilib \
+    --disable-symvers \
+    --disable-libmpx \
+    --disable-libmudflap \
+    --disable-libsanitizer \
+    --disable-werror \
+    --disable-fixed-point \
+    --disable-libstdcxx-pch \
+    --disable-nls \
+    --enable-checking=release \
+    --enable-__cxa_atexit \
+    --enable-default-pie \
+    --enable-default-ssp \
+    --enable-shared \
+    --enable-threads \
+    --enable-tls \
+    --enable-languages=c,c++ \
+    --without-included-gettext \
     --with-system-zlib \
-    --enable-languages=c,c++
+    "${bootstrap:---enable-bootstrap}"
 
 make
 make DESTDIR="$1" install
@@ -28,8 +54,8 @@ make DESTDIR="$1" install
 # Enable LTO
 
 install -v -dm755 "$1/usr/lib/bfd-plugins"
-ln -sfv ../../libexec/gcc/$(gcc -dumpmachine)/10.1.0/liblto_plugin.so \
-        "$1/usr/lib/bfd-plugins/"
+ln -sfv ../../libexec/gcc/$(gcc -dumpmachine)/$2/liblto_plugin.so \
+        "$1/usr/lib/bfd-plugins/liblto_plugin.so"
 
 # Save 35MB.
 find "$1" -name libgtkpeer.a  -delete

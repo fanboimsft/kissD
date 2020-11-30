@@ -5,7 +5,3 @@
 
 make BISON_LOCALEDIR=/usr/share/locale
 make DESTDIR="$1" install
-
-#fix file missing from package
-install -d /usr/share/gettext
-install -vm 0644 gettext-tools/misc/archive.dir.tar.xz /usr/share/gettext/archive.dir.tar.xz

@@ -1,0 +1,12 @@
+#!/bin/sh
+
+case $TYPE in
+	post-build)
+	# Ensure that '$DEST' is set.
+	: "${DEST:?DEST is unset}"
+
+	rm -rf "$DEST/usr/share/locale" \
+		"$DEST/usr/share/info"
+
+	;;
+esac
