@@ -1,0 +1,6 @@
+eudev
+glib
+gobject-introspection make
+libffi
+libgudev
+libusb

@@ -1,0 +1,12 @@
+#!/bin/sh -e
+
+for patch in *.patch; do
+    patch -Np1 < "$patch"
+done
+
+./configure \
+    --prefix=/usr \
+    --disable-nls
+
+make -j "$(nproc)"
+make DESTDIR="$1" install

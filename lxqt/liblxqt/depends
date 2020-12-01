@@ -1,0 +1,7 @@
+cmake make
+libqtxdg make
+lxqt-build-tools make
+kwindowsystem make
+qt5-svg make
+polkit-qt-1
+libXScrnSaver

@@ -1,0 +1,5 @@
+cmake make
+menu-cache make
+qt5-tools make
+qt5-x11extras make
+lxqt-build-tools make

@@ -1,0 +1,9 @@
+cmake                    make
+extra-cmake-modules      make
+mesa
+plasma-wayland-protocols make
+qt5
+qt5-wayland
+samurai                  make
+wayland
+wayland-protocols        make

@@ -1,0 +1,23 @@
+#!/bin/sh -e
+
+export DESTDIR="$1"
+
+rm -rf po
+
+pkg-config --exists libudev || {
+    printf 'udev (or libudev-zero) is required\n'
+    exit 1
+}
+
+sed -i '/#include <QVariant>/a #include <libudev.h>' \
+    src/solid/devices/backends/shared/udevqtdevice.h
+
+cmake -B build \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_INSTALL_LIBDIR=lib \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DBUILD_TESTING=NO \
+    -Wno-dev -G Ninja
+
+ninja -C build
+ninja -C build install

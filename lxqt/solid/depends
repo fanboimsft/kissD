@@ -1,0 +1,5 @@
+bison               make
+cmake               make
+extra-cmake-modules make
+flex                make
+samurai             make

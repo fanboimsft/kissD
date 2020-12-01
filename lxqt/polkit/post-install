@@ -1,0 +1,13 @@
+#!/bin/sh -e
+
+addgroup -S polkitd || true
+adduser -SDHh /var/empty -s /usr/bin/nologin -G polkitd -g polkitd polkitd || true
+
+chown -R polkitd:polkitd /etc/polkit-1/rules.d
+chown -R polkitd:polkitd /usr/share/polkit-1/rules.d
+
+chmod -R 700 /etc/polkit-1/rules.d
+chmod -R 700 /usr/share/polkit-1/rules.d
+
+chmod 4755 /usr/bin/pkexec
+chmod 4755 /usr/lib/polkit-1/polkit-agent-helper-1

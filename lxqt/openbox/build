@@ -1,0 +1,11 @@
+#!/bin/sh -e
+
+2to3-3.9 -w data/autostart/openbox-xdg-autostart
+sed 's/python/python3/' -i data/autostart/openbox-xdg-autostart
+
+./configure --prefix=/usr     \
+            --sysconfdir=/etc \
+            --disable-static
+
+make
+make DESTDIR=$1 install
