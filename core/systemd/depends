@@ -1,6 +1,7 @@
 linux-pam
 gnu-efi
 gperf
+kmod
 meson
 pkgconf
 shadow
