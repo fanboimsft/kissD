@@ -1,9 +1,0 @@
-automake make
-#elogind is optional -> required for sddm
-expat
-glib
-libtool  make
-#linux-pam -> auth
-pkgconf  make
-python   make
-#shadow -> altnerative auth

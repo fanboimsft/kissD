@@ -1,2 +1,2 @@
-python2 make
+rust make
 zip make
