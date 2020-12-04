@@ -1,0 +1,23 @@
+#!/bin/sh -e
+
+# The build fails if qtwebengine is already installed.
+find . -name '*.pr[fio]' | while read -r file; do
+    sed -i "s#INCLUDEPATH += #&\$\$QTWEBENGINE_ROOT/include #" "$file"
+done
+
+qmake QMAKE_CXXFLAGS=-DQT_NO_ACCESSIBILITY -- \
+    -feature-webengine-system-ninja \
+    -feature-webengine-system-zlib \
+    -feature-webengine-system-harfbuzz \
+    -feature-webengine-system-png \
+    -feature-webengine-system-libevent \
+    -feature-webengine-system-libvpx \
+    -feature-webengine-system-opus \
+    -feature-webengine-system-libwebp \
+    -feature-webengine-system-ffmpeg \
+    -feature-webengine-proprietary-codecs \
+    -no-feature-webengine-system-icu \
+    -no-feature-webengine-system-glib
+
+make
+make INSTALL_ROOT="$1" install
