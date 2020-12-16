@@ -8,6 +8,7 @@ cmake -B build \
     -DCMAKE_INSTALL_LIBDIR=lib \
     -DWITH_XC_UPDATECHECK=OFF \
     -DWITH_GUI_TESTS=OFF \
+    -DWITH_XC_DOCS=OFF \
     -DWITH_TESTS=OFF
 
 

@@ -1,0 +1,9 @@
+#!/bin/sh -e
+
+mkdir -pv $1/usr/bin
+cp -a * $1/usr/bin/
+
+install -Dm644 docker.service $1/usr/lib/systemd/system/docker.service
+install	-Dm644 docker.socket $1/usr/lib/systemd/system/docker.socket
+
+echo "add the docker group"
