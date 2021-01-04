@@ -1,0 +1,5 @@
+#!/bin/sh -e
+
+PYTHON=/usr/bin/python3 ./configure --prefix=/usr
+make
+make DESTDIR=$1 install

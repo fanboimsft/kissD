@@ -1,0 +1,14 @@
+#!/bin/sh -e
+
+patch -p1 -i libxml2-2.9.10-security_fixes-1.patch
+sed -i '/if Py/{s/Py/(Py/;s/)/))/}' python/{types.c,libxml.c}
+
+./configure \
+    --prefix=/usr \
+    --with-threads \
+    --with-history \
+    --with-python=/usr/bin/python3 \
+    --without-icu
+
+make
+make DESTDIR="$1" install

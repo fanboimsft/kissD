@@ -1,0 +1,7 @@
+#!/bin/sh -e
+
+./configure --prefix=/usr    \
+            --disable-doc    \
+            --disable-static
+make
+make DESTDIR=$1 install
