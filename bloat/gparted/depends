@@ -1,4 +1,3 @@
+intltool make
 gtkmm
 parted
-intltool make
-xml-parser make
